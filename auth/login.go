@@ -2,13 +2,13 @@ package auth
 
 import (
 	"ddl/config"
+	"ddl/database"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/mysql" //这个一定要引入哦！！
+	"github.com/gin-gonic/gin"
 )
 
 type GetAccessTokenRes struct {
@@ -24,41 +24,43 @@ func (UserInfo) TableName() string {
 	return "user"
 }
 
-func LoginHandler(w http.ResponseWriter, r *http.Request) {
-	values := r.URL.Query()
+func LoginHandler(c *gin.Context) {
 	// fmt.Println(values)
-	code := values.Get("code")
-	ref := values.Get("ref")
+	code := c.Request.FormValue("code")
+	ref := c.Request.FormValue("ref")
 	if ref == "" {
 		ref = "http://squidward.top/"
 	}
 	if code == "" {
-		fmt.Fprintf(w, "参数错误")
+		c.String(http.StatusBadRequest, "参数错误")
 	} else {
-		userID := LoginGetUserID(code)
+		userID := getWecomID(code)
 		// fmt.Println(userID)
 		if userID != "" {
 			userInfo := GetUserInfo(userID)
-			SetCookieUserInfo(w, userInfo)
-			request, _ := http.NewRequest("GET", ref, nil)
-			http.Redirect(w, request, ref, http.StatusFound)
+			SetCookieUserInfo(c, userInfo)
+
+			c.Header("Content-Type", "text/html")
+			c.String(200, "<script language='javascript'>window.location.href='"+ref+"'</script>")
+
 			// fmt.Println(userInfo)
 			// fmt.Fprintf(w, "%s %d %d %d", userInfo.UserID, userInfo.StudentID, userInfo.Class, userInfo.Permission)
 		}
 	}
 }
 
-func LogoutHandler(w http.ResponseWriter, r *http.Request) {
-	values := r.URL.Query()
+func LogoutHandler(c *gin.Context) {
 	// fmt.Println(values)
-	ref := values.Get("ref")
+	ref := c.Request.FormValue("ref")
 	if ref == "" {
 		ref = "http://squidward.top/"
 	}
 
-	DelCookieUserInfo(w)
-	request, _ := http.NewRequest("GET", ref, nil)
-	http.Redirect(w, request, ref, http.StatusFound)
+	DelCookieUserInfo(c)
+
+	c.Header("Content-Type", "text/html")
+	c.String(200, "<script language='javascript'>window.location.href='"+ref+"'</script>")
+
 	// fmt.Println(userInfo)
 	// fmt.Fprintf(w, "%s %d %d %d", userInfo.UserID, userInfo.StudentID, userInfo.Class, userInfo.Permission)
 
@@ -79,7 +81,7 @@ func HttpGet(url string) string {
 
 //微信登录部分
 
-func LoginGetAccessToken() string {
+func getAccessToken() string {
 	data := HttpGet("https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=" + config.CORPID + "&corpsecret=" + config.CORPSECRET)
 	res := GetAccessTokenRes{}
 	err := json.Unmarshal([]byte(data), &res)
@@ -91,14 +93,14 @@ func LoginGetAccessToken() string {
 	}
 }
 
-func LoginGetUserID(code string) string {
-	accessToken := LoginGetAccessToken()
+func getWecomID(code string) string {
+	accessToken := getAccessToken()
 	data := HttpGet("https://qyapi.weixin.qq.com/cgi-bin/user/getuserinfo?access_token=" + accessToken + "&code=" + code)
 	res := GetUserIDRes{}
 	err := json.Unmarshal([]byte(data), &res)
 	// fmt.Println(data)
 	if err != nil || res.Errmsg != "ok" {
-		fmt.Printf("GetUserID failed\n%s\n", res.Errmsg)
+		fmt.Printf("GetWecomID failed\n%s\n", res.Errmsg)
 		return ""
 	} else {
 		return res.UserID
@@ -106,17 +108,8 @@ func LoginGetUserID(code string) string {
 }
 
 func GetUserInfo(userID string) UserInfo {
-	db, errDb := gorm.Open("mysql", config.DB_USER_PW+"@("+config.DB_HOST+")/test?charset=utf8&loc=Local")
-	if errDb != nil {
-		fmt.Println(errDb)
-	}
-	defer db.Close() //用完之后关闭数据库连接
-
-	db.LogMode(true) //开启sql debug 模式
-
 	var userInfo UserInfo
-
-	db.Where("userID=?", userID).First(&userInfo)
+	database.DB.Where("userID=?", userID).First(&userInfo)
 	// fmt.Println(userInfo)
 
 	return userInfo
@@ -124,11 +117,11 @@ func GetUserInfo(userID string) UserInfo {
 
 //密码登录部分
 
-func LoginPassword(w http.ResponseWriter, key string) {
+func LoginPassword(c *gin.Context, key string) {
 
 	permission, exist := config.AdminKey[key]
 	if exist {
 		userInfo := UserInfo{Permission: permission}
-		SetCookieUserInfo(w, userInfo)
+		SetCookieUserInfo(c, userInfo)
 	}
 }

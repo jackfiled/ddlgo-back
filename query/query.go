@@ -2,14 +2,14 @@ package query
 
 import (
 	"ddl/common"
-	"ddl/config"
+	"ddl/database"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
 
-	"github.com/jinzhu/gorm"
+	"github.com/gin-gonic/gin"
 	_ "github.com/jinzhu/gorm/dialects/mysql" //这个一定要引入哦！！
 )
 
@@ -25,63 +25,46 @@ func Base64Decode(sEnc string) string {
 	return string(sDec)
 }
 
-func QuerySingleHandler(w http.ResponseWriter, r *http.Request) {
-	values := r.URL.Query()
-	class := values.Get("class")
-	index_ := values.Get("index_")
+func QuerySingleHandler(c *gin.Context) {
+	class := c.Request.FormValue("class")
+	index_ := c.Request.FormValue("index_")
 	if class == "" || index_ == "" {
-		fmt.Fprint(w, "GET 参数未指定")
+		c.String(http.StatusBadRequest, "参数错误")
 		return
 	}
-	db, errDb := gorm.Open("mysql", config.DB_USER_PW+"@("+config.DB_HOST+")/test?charset=utf8&loc=Local&parseTime=true")
-	if errDb != nil {
-		fmt.Println(errDb)
-	}
-	defer db.Close() //用完之后关闭数据库连接
-
-	db.LogMode(true) //开启sql debug 模式
 
 	noticeArr := []common.DDLNotice{}
 
-	db.Table(class).Where("index_=?", index_).Find(&noticeArr)
+	database.DB.Table(class).Where("index_=?", index_).Find(&noticeArr)
 	data, _ := json.Marshal(noticeArr)
 
-	w.Header().Set("Access-Control-Allow-Origin", "*")             //允许访问所有域
-	w.Header().Add("Access-Control-Allow-Headers", "Content-Type") //header的类型
-	w.Header().Set("content-type", "application/json")             //返回数据格式是json
-	fmt.Fprint(w, string(data))
+	// w.Header().Set("Access-Control-Allow-Origin", "*")             //允许访问所有域
+	// w.Header().Add("Access-Control-Allow-Headers", "Content-Type") //header的类型
+
+	c.Data(200, "application/json", data)
 }
 
-func GetListHandler(w http.ResponseWriter, r *http.Request) {
-	values := r.URL.Query()
-	class := values.Get("class")
+func GetListHandler(c *gin.Context) {
+	class := c.Request.FormValue("class")
 
 	if class == "" {
 		class = "dddd"
 	}
 
-	start := values.Get("start")
+	start := c.Request.FormValue("start")
 	if start == "" {
 		start = "0"
 	}
 
-	step := values.Get("step")
+	step := c.Request.FormValue("step")
 	if step == "" {
 		step = "20"
 	}
 
-	noticeType := values.Get("noticeType")
+	noticeType := c.Request.FormValue("noticeType")
 	if noticeType == "" {
 		noticeType = "-1"
 	}
-
-	db, errDb := gorm.Open("mysql", config.DB_USER_PW+"@("+config.DB_HOST+")/test?charset=utf8&loc=Local&parseTime=true")
-	if errDb != nil {
-		fmt.Println(errDb)
-	}
-	defer db.Close() //用完之后关闭数据库连接
-
-	db.LogMode(true) //开启sql debug 模式
 
 	noticeArr := []common.DDLNotice{}
 
@@ -116,19 +99,18 @@ func GetListHandler(w http.ResponseWriter, r *http.Request) {
 	// 	}
 
 	if noticeType == "-1" {
-		db.Table(class).Limit(step).Offset(start).Order("time DESC").Find(&noticeArr)
+		database.DB.Table(class).Limit(step).Offset(start).Order("time DESC").Find(&noticeArr)
 	} else if noticeType == "-2" {
-		db.Table(class).Limit(step).Offset(start).Where("noticeType != 0").Order("state, ddl").Find(&noticeArr)
+		database.DB.Table(class).Limit(step).Offset(start).Where("noticeType != 0").Order("state, ddl").Find(&noticeArr)
 	} else {
 		noticeTypeInt, _ := strconv.Atoi(noticeType)
-		db.Table(class).Limit(step).Offset(start).Where("noticeType = ?", noticeTypeInt).Order("state, ddl").Find(&noticeArr)
+		database.DB.Table(class).Limit(step).Offset(start).Where("noticeType = ?", noticeTypeInt).Order("state, ddl").Find(&noticeArr)
 	}
 
 	data, _ := json.Marshal(noticeArr)
 
-	w.Header().Set("Access-Control-Allow-Origin", "*")             //允许访问所有域
-	w.Header().Add("Access-Control-Allow-Headers", "Content-Type") //header的类型
-	w.Header().Set("content-type", "application/json")             //返回数据格式是json
+	// w.Header().Set("Access-Control-Allow-Origin", "*")             //允许访问所有域
+	// w.Header().Add("Access-Control-Allow-Headers", "Content-Type") //header的类型
 
-	fmt.Fprint(w, string(data))
+	c.Data(200, "application/json", data)
 }
