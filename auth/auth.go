@@ -7,7 +7,9 @@ import (
 	"ddl/database"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -59,7 +61,7 @@ func SetCookieUserInfo(c *gin.Context, userInfo UserInfo) {
 	data, _ := json.Marshal(userInfo)
 	fmt.Println(string(data))
 	value, _ := Encrypt(string(data), []byte(config.ENCRYPT_KEY))
-	c.SetCookie("UserInfo", value, 14*24*3600, "/", "", true, true)
+	c.SetCookie("UserInfo", value, 14*24*3600, "/", "", false, true)
 }
 
 //读取用户信息
@@ -92,12 +94,12 @@ func UpdateCookieUserInfo(c *gin.Context, studentID int32) {
 	data, _ := json.Marshal(userInfo)
 	fmt.Println(string(data))
 	value, _ := Encrypt(string(data), []byte(config.ENCRYPT_KEY))
-	c.SetCookie("UserInfo", value, 14*24*3600, "/", "", true, true)
+	c.SetCookie("UserInfo", value, 14*24*3600, "/", "", false, true)
 }
 
 //清除登陆状态
 func DelCookieUserInfo(c *gin.Context) {
-	c.SetCookie("UserInfo", "", -1, "/", "", true, true)
+	c.SetCookie("UserInfo", "", -1, "/", "", false, true)
 }
 
 //设置用户权限，保存在数据库中
@@ -110,37 +112,13 @@ func SetUserPermission(studentID int32, permission int64) UserInfo {
 func AuthDemoHandler(c *gin.Context) {
 	userInfo, err := GetCookieUserInfo(c)
 	if err != nil {
+		if !errors.Is(err, http.ErrNoCookie) {
+			c.String(http.StatusInternalServerError, err.Error())
+			return
+		}
 		fmt.Println(err)
 		c.Header("Content-Type", "text/html")
-		c.String(200, `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-</head>
-<body>
-		未登录 
-		<a href="https://open.weixin.qq.com/connect/oauth2/authorize?
-		appid=ww8a5308483ff283cc
-		&redirect_uri=%s
-		&response_type=code
-		&scope=snsapi_base
-		&state=STATE
-		#wechat_redirect">
-		微信/企业微信一键登录</a>
-
-		<a href="https://open.work.weixin.qq.com/wwopen/sso/qrConnect?
-		appid=ww8a5308483ff283cc
-		&agentid=1000003
-		&redirect_uri=%s
-		">
-		企业微信扫码登录</a>
-</body>
-</html>
-		
-		`,
-			"http%3A%2F%2Fsquidward.top%3A8000%2Fapi%2Flogin%3Fref%3Dhttp%3A%2F%2Fsquidward.top%3A8000%2Fapi%2Fauth_demo",
-			"http%3A%2F%2Fsquidward.top%3A8000%2Fapi%2Flogin%3Fref%3Dhttp%3A%2F%2Fsquidward.top%3A8000%2Fapi%2Fauth_demo")
+		c.String(200, "<script language='javascript'>window.location.href='/login.html'</script>")
 		return
 	}
 

@@ -1,21 +1,38 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 
+	"ddl/admin"
 	"ddl/auth"
+	"ddl/common"
+	"ddl/database"
 	"ddl/query"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
+	err := database.Open()
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
 
 	router := gin.Default()
+
+	router.Use(common.Cors())
+
 	router.GET("/", indexHandler)
-	router.GET("/api/login", auth.LoginHandler)
-	router.GET("/api/logout", auth.LogoutHandler)
+
+	//测试用
+	router.StaticFile("/login.html", "./static/login.html")
+
+	router.GET("/api/login", auth.WechatLoginHandler)
+	router.GET("/api/logout", auth.WechatLogoutHandler)
 
 	router.GET("/WW_verify_udfdZsIBL9yNi4SN.txt", WWVerify)
 
@@ -24,6 +41,9 @@ func main() {
 
 	router.GET("/api/get_list", query.GetListHandler)
 	router.GET("/api/query_single", query.QuerySingleHandler)
+
+	router.POST("/api/save", admin.SaveHandler)
+	router.POST("/api/delete", admin.DeleteHandler)
 
 	router.Run(":8000")
 }

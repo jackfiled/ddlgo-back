@@ -3,28 +3,17 @@ package auth
 import (
 	"ddl/config"
 	"ddl/database"
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
+	"ddl/wecom"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-type GetAccessTokenRes struct {
-	Access_token string
-}
-
-type GetUserIDRes struct {
-	UserID string
-	Errmsg string
-}
-
 func (UserInfo) TableName() string {
 	return "user"
 }
 
-func LoginHandler(c *gin.Context) {
+func WechatLoginHandler(c *gin.Context) {
 	// fmt.Println(values)
 	code := c.Request.FormValue("code")
 	ref := c.Request.FormValue("ref")
@@ -34,7 +23,7 @@ func LoginHandler(c *gin.Context) {
 	if code == "" {
 		c.String(http.StatusBadRequest, "参数错误")
 	} else {
-		userID := getWecomID(code)
+		userID := wecom.GetWecomID(code)
 		// fmt.Println(userID)
 		if userID != "" {
 			userInfo := GetUserInfo(userID)
@@ -49,7 +38,7 @@ func LoginHandler(c *gin.Context) {
 	}
 }
 
-func LogoutHandler(c *gin.Context) {
+func WechatLogoutHandler(c *gin.Context) {
 	// fmt.Println(values)
 	ref := c.Request.FormValue("ref")
 	if ref == "" {
@@ -66,53 +55,10 @@ func LogoutHandler(c *gin.Context) {
 
 }
 
-func HttpGet(url string) string {
-	res, err := http.Get(url)
-	if err != nil {
-		return ""
-	}
-	robots, err := ioutil.ReadAll(res.Body)
-	res.Body.Close()
-	if err != nil {
-		return ""
-	}
-	return string(robots)
-}
-
-//微信登录部分
-
-func getAccessToken() string {
-	data := HttpGet("https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=" + config.CORPID + "&corpsecret=" + config.CORPSECRET)
-	res := GetAccessTokenRes{}
-	err := json.Unmarshal([]byte(data), &res)
-	if err != nil {
-		fmt.Println("GetAccessToken failed")
-		return ""
-	} else {
-		return res.Access_token
-	}
-}
-
-func getWecomID(code string) string {
-	accessToken := getAccessToken()
-	data := HttpGet("https://qyapi.weixin.qq.com/cgi-bin/user/getuserinfo?access_token=" + accessToken + "&code=" + code)
-	res := GetUserIDRes{}
-	err := json.Unmarshal([]byte(data), &res)
-	// fmt.Println(data)
-	if err != nil || res.Errmsg != "ok" {
-		fmt.Printf("GetWecomID failed\n%s\n", res.Errmsg)
-		return ""
-	} else {
-		return res.UserID
-	}
-}
-
-func GetUserInfo(userID string) UserInfo {
-	var userInfo UserInfo
+func GetUserInfo(userID string) (userInfo UserInfo) {
 	database.DB.Where("userID=?", userID).First(&userInfo)
 	// fmt.Println(userInfo)
-
-	return userInfo
+	return
 }
 
 //密码登录部分

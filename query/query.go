@@ -3,9 +3,7 @@ package query
 import (
 	"ddl/common"
 	"ddl/database"
-	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -13,17 +11,17 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/mysql" //这个一定要引入哦！！
 )
 
-func Base64Decode(sEnc string) string {
+// func Base64Decode(sEnc string) string {
 
-	// Base64 Standard Decoding
-	sDec, err := base64.StdEncoding.DecodeString(sEnc)
-	if err != nil {
-		fmt.Printf("Error decoding string: %s ", err.Error())
-		return ""
-	}
+// 	// Base64 Standard Decoding
+// 	sDec, err := base64.StdEncoding.DecodeString(sEnc)
+// 	if err != nil {
+// 		fmt.Printf("Error decoding string: %s ", err.Error())
+// 		return ""
+// 	}
 
-	return string(sDec)
-}
+// 	return string(sDec)
+// }
 
 func QuerySingleHandler(c *gin.Context) {
 	class := c.Request.FormValue("class")

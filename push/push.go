@@ -2,6 +2,7 @@ package push
 
 import (
 	"bytes"
+	"ddl/wecom"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -14,13 +15,13 @@ var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 //touser := ""                            //企业号中的用户帐号，在zabbix用户Media中配置，如果配置不正常，将按部门发送。
 //toparty := "1"                                              //企业号中的部门id。
-var corpid = "ww8a5308483ff283cc" //企业号的标识
+// var corpid = "ww8a5308483ff283cc" //企业号的标识
 
 // var agentid = 1000002                                          //企业号中的应用id。
 // var corpsecret = "EPQstC4qi51TcvtVQRzQ1HowUdJ4jrOG_cFgcIA160E" //企业号中的应用的Secret
 var corpsecretMap = map[int]string{
-	1000002: "EPQstC4qi51TcvtVQRzQ1HowUdJ4jrOG_cFgcIA160E",
-	1000005: "tFqgBhMGuktPfuEuXmvkXktU-W6Oq7cLFAg_n-WbwYQ",
+	1000002: "EPQstC4qi51TcvtVQRzQ1HowUdJ4jrOG_cFgcIA160E", //通知大全
+	1000005: "tFqgBhMGuktPfuEuXmvkXktU-W6Oq7cLFAg_n-WbwYQ", //活动大全
 }
 
 // var partyMap = map[string]string{
@@ -42,6 +43,7 @@ var noticeTypeMap = map[int]string{
 	4: "志愿活动",
 	5: "讲座",
 	6: "竞赛",
+	7: "评优",
 }
 
 type JSON struct {
@@ -75,21 +77,7 @@ type MESSAGESCRAD struct {
 	Safe int `json:"safe"`
 }
 
-func Get_AccessToken(corpid, corpsecret string) string {
-	gettoken_url := "https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=" + corpid + "&corpsecret=" + corpsecret
-	//print(gettoken_url)
-	client := &http.Client{}
-	req, _ := client.Get(gettoken_url)
-	defer req.Body.Close()
-	body, _ := ioutil.ReadAll(req.Body)
-	//fmt.Printf("\n%q",string(body))
-	var json_str JSON
-	json.Unmarshal([]byte(body), &json_str)
-	//fmt.Printf("\n%q",json_str.Access_token)
-	return json_str.Access_token
-}
-
-func SendData(access_token, msg string) {
+func sendData(access_token, msg string) {
 	send_url := "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=" + access_token
 	//print(send_url)
 	client := &http.Client{}
@@ -178,29 +166,34 @@ func messagesGroupCard(toparty string, agentid int, title string, description st
 // }
 
 //partyID:部门ID noticeType:通知类型 title:标题 dateTime:时间 detail:详情 url:卡片跳转链接
-func SendNotice(partyIDs string, noticeType string, title string, dateTime string, detail string, url string) {
-	var agentid = 1000002
-	accessToken := Get_AccessToken(corpid, corpsecretMap[agentid])
+func SendNotice(partyIDs string, noticeType int, title string, dateTime string, detail string, url string) {
+	var agentid int
+	if noticeType == 0 {
+		agentid = 1000002
+	} else {
+		agentid = 1000005
+	}
+	accessToken := wecom.GetAccessToken(corpsecretMap[agentid])
 
 	fmt.Println(partyIDs)
 	// 序列化成json之后，\n会被转义，也就是变成了\\n，使用str替换，替换掉转义
-	msg := messagesGroupCard(partyIDs, agentid, title, "<div class=\"gray\">"+dateTime+" | "+noticeType+"</div><br>"+detail, url)
+	msg := messagesGroupCard(partyIDs, agentid, title, "<div class=\"gray\">"+dateTime+" | "+noticeTypeMap[noticeType]+"</div><br>"+detail, url)
 	msg = strings.Replace(msg, "\\\\", "\\", -1)
 
 	//  fmt.Println(strings.Replace(msg,"\\\\","\\",-1))
-	SendData(accessToken, msg)
+	sendData(accessToken, msg)
 }
 
-//partyID:部门ID noticeType:通知类型 title:标题 dateTime:时间 detail:详情 url:卡片跳转链接
-func SendNoticeActivity(partyIDs string, noticeType string, title string, dateTime string, detail string, url string) {
-	var agentid = 1000005
-	accessToken := Get_AccessToken(corpid, corpsecretMap[agentid])
+// //partyID:部门ID noticeType:通知类型 title:标题 dateTime:时间 detail:详情 url:卡片跳转链接
+// func SendNoticeActivity(partyIDs string, noticeType int, title string, dateTime string, detail string, url string) {
+// 	var agentid = 1000005
+// 	accessToken := wecom.GetAccessToken(corpsecretMap[agentid])
 
-	fmt.Println(partyIDs)
-	// 序列化成json之后，\n会被转义，也就是变成了\\n，使用str替换，替换掉转义
-	msg := messagesGroupCard(partyIDs, agentid, title, "<div class=\"gray\">"+dateTime+" | "+noticeType+"</div><br>"+detail, url)
-	msg = strings.Replace(msg, "\\\\", "\\", -1)
+// 	fmt.Println(partyIDs)
+// 	// 序列化成json之后，\n会被转义，也就是变成了\\n，使用str替换，替换掉转义
+// 	msg := messagesGroupCard(partyIDs, agentid, title, "<div class=\"gray\">"+dateTime+" | "+noticeTypeMap[noticeType]+"</div><br>"+detail, url)
+// 	msg = strings.Replace(msg, "\\\\", "\\", -1)
 
-	//  fmt.Println(strings.Replace(msg,"\\\\","\\",-1))
-	SendData(accessToken, msg)
-}
+// 	//  fmt.Println(strings.Replace(msg,"\\\\","\\",-1))
+// 	sendData(accessToken, msg)
+// }
