@@ -9,6 +9,7 @@ import (
 	"ddl/admin"
 	"ddl/auth"
 	"ddl/common"
+	"ddl/config"
 	"ddl/database"
 	"ddl/query"
 
@@ -44,8 +45,9 @@ func main() {
 
 	router.POST("/api/save", admin.SaveHandler)
 	router.POST("/api/delete", admin.DeleteHandler)
+	router.POST("/api/upload_img", admin.UploadFileHandler)
 
-	router.Run(":8000")
+	router.Run(config.WEB_ADDR)
 }
 
 func indexHandler(c *gin.Context) {
