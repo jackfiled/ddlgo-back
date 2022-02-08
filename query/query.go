@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/jinzhu/gorm/dialects/mysql" //这个一定要引入哦！！
@@ -99,10 +100,31 @@ func GetListHandler(c *gin.Context) {
 	if noticeType == "-1" {
 		database.DB.Table(class).Limit(step).Offset(start).Order("time DESC").Find(&noticeArr)
 	} else if noticeType == "-2" {
-		database.DB.Table(class).Limit(step).Offset(start).Where("noticeType != 0").Order("state, ddl").Find(&noticeArr)
+		now := time.Now()
+		if start == "0" {
+			//未过期通知
+			database.DB.Table(class).Where("noticeType != 0 and ddl >= ?", now).Order("ddl").Find(&noticeArr)
+		}
+		//已过期通知
+		noticeArr1 := []common.DDLNotice{}
+		database.DB.Table(class).Limit(step).Offset(start).Where("noticeType != 0 and ddl < ?", now).Order("ddl DESC").Find(&noticeArr1)
+
+		//合并
+		noticeArr = append(noticeArr, noticeArr1...)
 	} else {
 		noticeTypeInt, _ := strconv.Atoi(noticeType)
-		database.DB.Table(class).Limit(step).Offset(start).Where("noticeType = ?", noticeTypeInt).Order("state, ddl").Find(&noticeArr)
+
+		now := time.Now()
+		if start == "0" {
+			//未过期通知
+			database.DB.Table(class).Where("noticeType = ? and ddl >= ?", noticeTypeInt, now).Order("ddl").Find(&noticeArr)
+		}
+		//已过期通知
+		noticeArr1 := []common.DDLNotice{}
+		database.DB.Table(class).Limit(step).Offset(start).Where("noticeType = ? and ddl < ?", noticeTypeInt, now).Order("ddl DESC").Find(&noticeArr1)
+
+		//合并
+		noticeArr = append(noticeArr, noticeArr1...)
 	}
 
 	data, _ := json.Marshal(noticeArr)

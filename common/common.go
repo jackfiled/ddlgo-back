@@ -9,15 +9,30 @@ import (
 )
 
 type DDLNotice struct {
-	Index      int       `gorm:"column:index_;primary_key" json:"index_"`
-	Time       time.Time `gorm:"column:time" json:"time"`
-	DDL        time.Time `gorm:"column:ddl" json:"ddl"`
-	StartTime  time.Time `gorm:"column:startTime" json:"startTime"`
-	State      int       `gorm:"column:state" json:"state"`
-	Title      string    `gorm:"column:title" json:"title"`
-	Detail     string    `gorm:"column:detail" json:"detail"`
-	NoticeType int       `gorm:"column:noticeType" json:"noticeType"`
-	Img        string    `gorm:"column:img" json:"img"`
+	Index      int        `gorm:"column:index_;primary_key" json:"index_"`
+	Time       time.Time  `gorm:"column:time" json:"time"`
+	DDL        time.Time  `gorm:"column:ddl" json:"ddl"`
+	StartTime  *time.Time `gorm:"column:startTime" json:"startTime"`
+	Title      string     `gorm:"column:title" json:"title"`
+	Detail     string     `gorm:"column:detail" json:"detail"`
+	NoticeType int        `gorm:"column:noticeType" json:"noticeType"`
+	Img        string     `gorm:"column:img" json:"img"`
+}
+
+//用于接收管理端数据的结构
+type AdminNotice struct {
+	Class      string     `gorm:"-" json:"classes"` //不写入数据库
+	Index      int        `gorm:"column:index_;primary_key" json:"index_"`
+	DDL        time.Time  `gorm:"column:ddl" json:"ddl"`
+	StartTime  *time.Time `gorm:"column:startTime" json:"startTime"`
+	Title      string     `gorm:"column:title" json:"title"`
+	Detail     string     `gorm:"column:detail" json:"detail"`
+	NoticeType int        `gorm:"column:noticeType" json:"noticeType"`
+	Img        string     `gorm:"column:img" json:"img"`
+}
+
+func (an *AdminNotice) TableName() string {
+	return an.Class
 }
 
 var PartyMap = map[string]string{

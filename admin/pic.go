@@ -13,9 +13,13 @@ import (
 
 func UploadFileHandler(c *gin.Context) {
 
-	fileNames := make([]string, 0)
+	mForm, err := c.MultipartForm()
+	if err != nil {
+		c.String(http.StatusBadRequest, err.Error())
+		return
+	}
 
-	mForm := c.Request.MultipartForm
+	fileNames := make([]string, 0, len(mForm.File))
 
 	for k, _ := range mForm.File {
 		// k is the key of file part
@@ -47,7 +51,7 @@ func UploadFileHandler(c *gin.Context) {
 			fmt.Println(err.Error())
 			return
 		}
-		fileNames = append(fileNames, localFileName)
+		fileNames = append(fileNames, "p"+nowString+"_"+fileHeader.Filename)
 	}
 
 	c.JSON(200, fileNames)
