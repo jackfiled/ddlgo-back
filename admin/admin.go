@@ -3,10 +3,13 @@ package admin
 import (
 	"ddl/common"
 	"ddl/database"
+	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 )
 
 func SaveHandler(c *gin.Context) {
@@ -69,16 +72,26 @@ func SaveHandler(c *gin.Context) {
 	if data.Index != 0 {
 		title = "【修改】" + title
 	}
-	// push.SendNotice(common.PartyMap[form.Get("classes")], notice.NoticeType, title,
+	// push.SendNotice(common.PartyMap[form.Get("class")], notice.NoticeType, title,
 	// 	form.Get("startTime")+"--"+form.Get("ddl"), notice.Detail,
-	// 	"http://www.squidward.top/?cla="+form.Get("classes")+"#"+strconv.Itoa(notice.Index))
+	// 	"http://www.squidward.top/?cla="+form.Get("class")+"#"+strconv.Itoa(notice.Index))
 	_ = title
 	c.JSON(200, data)
 }
 
 func DeleteHandler(c *gin.Context) {
 	var err error
-	form := c.Request.Form
+	class := c.Request.FormValue("class")
+	indStr := c.Request.FormValue("index_")
+	if class == "" || indStr == "" {
+		c.String(http.StatusBadRequest, "参数错误")
+		return
+	}
+
+	index, err := strconv.Atoi(indStr)
+	if err != nil {
+		c.String(http.StatusBadRequest, "参数错误")
+	}
 
 	// userInfo, err := auth.GetCookieUserInfo(c)
 	// if err != nil {
@@ -87,16 +100,21 @@ func DeleteHandler(c *gin.Context) {
 	// 	} else {
 	// 		c.String(http.StatusInternalServerError, err.Error())
 	// 	}
+	//  return
 	// }
 
-	// var notice common.DDLNotice
-	// err = database.DB.Table(form.Get("classes")).Where("index_=?", form.Get("index_")).First(&notice).Error
-	// if err != nil {
-	// 	c.String(http.StatusInternalServerError, err.Error())
-	// 	return
-	// }
+	notice := common.AdminNotice{Class: class, Index: index}
+	err = database.DB.Model(&notice).First(&notice).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.String(http.StatusBadRequest, "通知不存在")
+			return
+		}
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
 
-	// switch form.Get("classes") {
+	// switch form.Get("class") {
 	// case "":
 	// 	c.String(http.StatusBadRequest, err.Error())
 	// 	return
@@ -106,7 +124,7 @@ func DeleteHandler(c *gin.Context) {
 	// 		return
 	// 	}
 	// default:
-	// 	if "2021211"+form.Get("classes") != strconv.Itoa(int(userInfo.Class)) {
+	// 	if "2021211"+form.Get("class") != strconv.Itoa(int(userInfo.Class)) {
 	// 		c.String(http.StatusBadRequest, "权限不足")
 	// 		return
 	// 	}
@@ -116,7 +134,7 @@ func DeleteHandler(c *gin.Context) {
 	// 	}
 	// }
 
-	err = database.DB.Table(form.Get("classes")).Delete("index_=?", form.Get("index_")).Error
+	err = database.DB.Delete(&common.AdminNotice{Class: class, Index: index}).Error
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return

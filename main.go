@@ -32,11 +32,13 @@ func main() {
 	//测试用
 	router.StaticFile("/login.html", "./static/login.html")
 
-	router.GET("/api/login", auth.WechatLoginHandler)
-	router.GET("/api/logout", auth.WechatLogoutHandler)
+	router.GET("/api/wechatlogin", auth.WechatLoginHandler)
+	router.POST("/api/login", auth.LoginHandler)
+	router.GET("/api/logout", auth.LogoutHandler)
 
 	router.GET("/WW_verify_udfdZsIBL9yNi4SN.txt", WWVerify)
 
+	router.GET("/api/check_auth", auth.CheckAuthHandler)
 	router.GET("/api/auth_demo", auth.AuthDemoHandler)
 	router.GET("/api/set_permission_demo", setPermission)
 
@@ -44,7 +46,7 @@ func main() {
 	router.GET("/api/query_single", query.QuerySingleHandler)
 
 	router.POST("/api/save", admin.SaveHandler)
-	router.POST("/api/delete", admin.DeleteHandler)
+	router.DELETE("/api/delete", admin.DeleteHandler)
 	router.POST("/api/upload_img", admin.UploadFileHandler)
 
 	router.Run(config.WEB_ADDR)

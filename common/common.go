@@ -3,6 +3,7 @@ package common
 import (
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -21,7 +22,7 @@ type DDLNotice struct {
 
 //用于接收管理端数据的结构
 type AdminNotice struct {
-	Class      string     `gorm:"-" json:"classes"` //不写入数据库
+	Class      string     `gorm:"-" json:"class"` //不写入数据库
 	Index      int        `gorm:"column:index_;primary_key" json:"index_"`
 	DDL        time.Time  `gorm:"column:ddl" json:"ddl"`
 	StartTime  *time.Time `gorm:"column:startTime" json:"startTime"`
@@ -60,9 +61,15 @@ func HttpGet(url string) string {
 }
 
 func Cors() gin.HandlerFunc {
+	// 	const originList = `http://localhost:3000
+	// http://127.0.0.1:3000`
 	return func(c *gin.Context) {
 		method := c.Request.Method
-		c.Header("Access-Control-Allow-Origin", "*") // 可将将 * 替换为指定的域名
+		origin := c.GetHeader("Origin")
+		if c.GetHeader("Origin") != "" && (strings.Contains(origin, "http://localhost:") || strings.Contains(origin, "http://127.0.0.1:")) {
+			c.Header("Access-Control-Allow-Origin", c.GetHeader("Origin"))
+			// c.Header("Access-Control-Allow-Origin", "*") // 可将将 * 替换为指定的域名
+		}
 		c.Header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, UPDATE")
 		c.Header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization")
 		c.Header("Access-Control-Expose-Headers", "Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Cache-Control, Content-Language, Content-Type")

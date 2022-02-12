@@ -10,15 +10,19 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
+var ErrExpTime = errors.New("exp time")
+
 type UserInfo struct {
-	UserID     string `gorm:"column:userID"`
-	StudentID  int32  `gorm:"column:studentID;primary_key"`
-	Permission int64  `gorm:"column:permission"`
-	Class      int32  `gorm:"column:class"`
+	UserID     string    `gorm:"column:userID"`
+	StudentID  int32     `gorm:"column:studentID;primary_key"`
+	Permission int64     `gorm:"column:permission"`
+	Class      int32     `gorm:"column:class"`
+	ExpTime    time.Time `gorm:"-"`
 }
 
 func Encrypt(text string, key []byte) (string, error) {
@@ -58,10 +62,21 @@ func Decrypt(encrypted string, key []byte) (string, error) {
 
 //保存用户信息
 func SetCookieUserInfo(c *gin.Context, userInfo UserInfo) {
+	userInfo.ExpTime = time.Now().AddDate(0, 0, 14)
 	data, _ := json.Marshal(userInfo)
 	fmt.Println(string(data))
 	value, _ := Encrypt(string(data), []byte(config.ENCRYPT_KEY))
-	c.SetCookie("UserInfo", value, 14*24*3600, "/", "", false, true)
+	// c.SetCookie("UserInfo", value, 14*24*3600, "/", "", false, true)
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     "UserInfo",
+		Value:    value,
+		Path:     "/",
+		Domain:   "",
+		MaxAge:   14 * 24 * 3600,
+		Secure:   true,
+		HttpOnly: false,
+		SameSite: http.SameSiteNoneMode,
+	})
 }
 
 //读取用户信息
@@ -83,6 +98,9 @@ func GetCookieUserInfo(c *gin.Context) (UserInfo, error) {
 		fmt.Println("Json unmarshal failed")
 		return userInfo, err
 	}
+	if time.Now().After(userInfo.ExpTime) {
+		return userInfo, ErrExpTime
+	}
 	return userInfo, nil
 }
 
@@ -90,16 +108,26 @@ func GetCookieUserInfo(c *gin.Context) (UserInfo, error) {
 func UpdateCookieUserInfo(c *gin.Context, studentID int32) {
 	var userInfo UserInfo
 	database.DB.Table("user").Where("studentID=?", studentID).Take(&userInfo)
-
+	userInfo.ExpTime = time.Now().AddDate(0, 0, 14)
 	data, _ := json.Marshal(userInfo)
 	fmt.Println(string(data))
 	value, _ := Encrypt(string(data), []byte(config.ENCRYPT_KEY))
-	c.SetCookie("UserInfo", value, 14*24*3600, "/", "", false, true)
+	// c.SetCookie("UserInfo", value, 14*24*3600, "/", "", false, true)
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     "UserInfo",
+		Value:    value,
+		Path:     "/",
+		Domain:   "",
+		MaxAge:   14 * 24 * 3600,
+		Secure:   true,
+		HttpOnly: false,
+		SameSite: http.SameSiteNoneMode,
+	})
 }
 
 //清除登陆状态
 func DelCookieUserInfo(c *gin.Context) {
-	c.SetCookie("UserInfo", "", -1, "/", "", false, true)
+	c.SetCookie("UserInfo", "", -1, "/", "", true, false)
 }
 
 //设置用户权限，保存在数据库中
@@ -142,4 +170,40 @@ func AuthDemoHandler(c *gin.Context) {
 		
 		`, userInfo.UserID, userInfo.StudentID, userInfo.Class, userInfo.Permission, "http%3A%2F%2Fsquidward.top%3A8000%2Fapi%2Fauth_demo")
 
+}
+
+func CheckAuthHandler(c *gin.Context) {
+	userInfo, err := GetCookieUserInfo(c)
+	if err != nil {
+		if !errors.Is(err, http.ErrNoCookie) {
+			c.String(http.StatusInternalServerError, err.Error())
+			return
+		}
+		c.JSON(200, false)
+		return
+	}
+
+	//已登陆
+	//更新一下
+	if userInfo.StudentID == 0 {
+		userInfo.ExpTime = time.Now().AddDate(0, 0, 14)
+		data, _ := json.Marshal(userInfo)
+		fmt.Println(string(data))
+		value, _ := Encrypt(string(data), []byte(config.ENCRYPT_KEY))
+		// c.SetCookie("UserInfo", value, 14*24*3600, "/", "", false, true)
+		http.SetCookie(c.Writer, &http.Cookie{
+			Name:     "UserInfo",
+			Value:    value,
+			Path:     "/",
+			Domain:   "",
+			MaxAge:   14 * 24 * 3600,
+			Secure:   true,
+			HttpOnly: false,
+			SameSite: http.SameSiteNoneMode,
+		})
+	} else {
+		UpdateCookieUserInfo(c, userInfo.StudentID)
+	}
+
+	c.JSON(200, userInfo)
 }

@@ -38,7 +38,19 @@ func WechatLoginHandler(c *gin.Context) {
 	}
 }
 
-func WechatLogoutHandler(c *gin.Context) {
+func LoginHandler(c *gin.Context) {
+	// fmt.Println(values)
+	key := c.Request.FormValue("key")
+	pass := LoginPassword(c, key)
+	if pass {
+		c.JSON(200, UserInfo{Permission: config.AdminKey[key]})
+	} else {
+		c.JSON(200, false)
+	}
+
+}
+
+func LogoutHandler(c *gin.Context) {
 	// fmt.Println(values)
 	ref := c.Request.FormValue("ref")
 	if ref == "" {
@@ -63,11 +75,12 @@ func GetUserInfo(userID string) (userInfo UserInfo) {
 
 //密码登录部分
 
-func LoginPassword(c *gin.Context, key string) {
+func LoginPassword(c *gin.Context, key string) bool {
 
 	permission, exist := config.AdminKey[key]
 	if exist {
 		userInfo := UserInfo{Permission: permission}
 		SetCookieUserInfo(c, userInfo)
 	}
+	return exist
 }
