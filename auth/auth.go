@@ -127,7 +127,16 @@ func UpdateCookieUserInfo(c *gin.Context, studentID int32) {
 
 //清除登陆状态
 func DelCookieUserInfo(c *gin.Context) {
-	c.SetCookie("UserInfo", "", -1, "/", "", true, false)
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     "UserInfo",
+		Value:    "",
+		Path:     "/",
+		Domain:   "",
+		MaxAge:   -1,
+		Secure:   true,
+		HttpOnly: false,
+		SameSite: http.SameSiteNoneMode,
+	})
 }
 
 //设置用户权限，保存在数据库中

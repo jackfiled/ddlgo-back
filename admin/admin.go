@@ -1,6 +1,7 @@
 package admin
 
 import (
+	"ddl/auth"
 	"ddl/common"
 	"ddl/database"
 	"errors"
@@ -23,44 +24,34 @@ func SaveHandler(c *gin.Context) {
 	}
 	fmt.Println(data)
 
-	// userInfo, err := auth.GetCookieUserInfo(c)
-	// if err != nil {
-	// 	if errors.Is(err, http.ErrNoCookie) {
-	// 		c.String(http.StatusBadRequest, err.Error())
-	// 	} else {
-	// 		c.String(http.StatusInternalServerError, err.Error())
-	// 	}
-	// }
+	userInfo, err := auth.GetCookieUserInfo(c)
+	if err != nil {
+		if errors.Is(err, http.ErrNoCookie) {
+			c.String(http.StatusBadRequest, err.Error())
+		} else {
+			c.String(http.StatusInternalServerError, err.Error())
+		}
+	}
 
-	// switch data.Class {
-	// case "":
-	// 	c.String(http.StatusBadRequest, err.Error())
-	// 	return
-	// case "dddd":
-	// 	if userInfo.Permission&(1<<int64(data.NoticeType)) == 0 {
-	// 		c.String(http.StatusBadRequest, "权限不足")
-	// 		return
-	// 	}
-	// default:
-	// 	if "2021211"+data.Class != strconv.Itoa(int(userInfo.Class)) {
-	// 		c.String(http.StatusBadRequest, "权限不足")
-	// 		return
-	// 	}
-	// 	if userInfo.Permission&(1<<16<<int64(data.NoticeType)) == 0 {
-	// 		c.String(http.StatusBadRequest, "权限不足")
-	// 		return
-	// 	}
-	// }
-
-	// notice := common.DDLNotice{
-	// 	Index:      data.Index,
-	// 	Title:      data.Title,
-	// 	Detail:     data.Detail,
-	// 	DDL:        data.DDL,
-	// 	NoticeType: data.NoticeType,
-	// 	Img:        data.Img,
-	// 	StartTime:  data.StartTime,
-	// }
+	switch data.Class {
+	case "":
+		c.String(http.StatusBadRequest, err.Error())
+		return
+	case "dddd":
+		if userInfo.Permission&(1<<int64(data.NoticeType)) == 0 {
+			c.String(http.StatusBadRequest, "权限不足")
+			return
+		}
+	default:
+		if "2021211"+data.Class != strconv.Itoa(int(userInfo.Class)) {
+			c.String(http.StatusBadRequest, "权限不足")
+			return
+		}
+		if userInfo.Permission&(1<<16<<int64(data.NoticeType)) == 0 {
+			c.String(http.StatusBadRequest, "权限不足")
+			return
+		}
+	}
 
 	err = database.DB.Save(&data).Error
 	if err != nil {
@@ -93,15 +84,15 @@ func DeleteHandler(c *gin.Context) {
 		c.String(http.StatusBadRequest, "参数错误")
 	}
 
-	// userInfo, err := auth.GetCookieUserInfo(c)
-	// if err != nil {
-	// 	if errors.Is(err, http.ErrNoCookie) {
-	// 		c.String(http.StatusBadRequest, err.Error())
-	// 	} else {
-	// 		c.String(http.StatusInternalServerError, err.Error())
-	// 	}
-	//  return
-	// }
+	userInfo, err := auth.GetCookieUserInfo(c)
+	if err != nil {
+		if errors.Is(err, http.ErrNoCookie) {
+			c.String(http.StatusBadRequest, err.Error())
+		} else {
+			c.String(http.StatusInternalServerError, err.Error())
+		}
+		return
+	}
 
 	notice := common.AdminNotice{Class: class, Index: index}
 	err = database.DB.Model(&notice).First(&notice).Error
@@ -114,25 +105,25 @@ func DeleteHandler(c *gin.Context) {
 		return
 	}
 
-	// switch form.Get("class") {
-	// case "":
-	// 	c.String(http.StatusBadRequest, err.Error())
-	// 	return
-	// case "dddd":
-	// 	if userInfo.Permission&(1<<int64(notice.NoticeType)) == 0 {
-	// 		c.String(http.StatusBadRequest, "权限不足")
-	// 		return
-	// 	}
-	// default:
-	// 	if "2021211"+form.Get("class") != strconv.Itoa(int(userInfo.Class)) {
-	// 		c.String(http.StatusBadRequest, "权限不足")
-	// 		return
-	// 	}
-	// 	if userInfo.Permission&(1<<16<<int64(notice.NoticeType)) == 0 {
-	// 		c.String(http.StatusBadRequest, "权限不足")
-	// 		return
-	// 	}
-	// }
+	switch class {
+	case "":
+		c.String(http.StatusBadRequest, err.Error())
+		return
+	case "dddd":
+		if userInfo.Permission&(1<<int64(notice.NoticeType)) == 0 {
+			c.String(http.StatusBadRequest, "权限不足")
+			return
+		}
+	default:
+		if "2021211"+class != strconv.Itoa(int(userInfo.Class)) {
+			c.String(http.StatusBadRequest, "权限不足")
+			return
+		}
+		if userInfo.Permission&(1<<16<<int64(notice.NoticeType)) == 0 {
+			c.String(http.StatusBadRequest, "权限不足")
+			return
+		}
+	}
 
 	err = database.DB.Delete(&common.AdminNotice{Class: class, Index: index}).Error
 	if err != nil {
