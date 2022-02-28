@@ -3,6 +3,7 @@ package auth
 import (
 	"crypto/aes"
 	"crypto/cipher"
+	"ddl/common"
 	"ddl/config"
 	"ddl/database"
 	"encoding/hex"
@@ -16,14 +17,6 @@ import (
 )
 
 var ErrExpTime = errors.New("exp time")
-
-type UserInfo struct {
-	UserID     string    `gorm:"column:userID"`
-	StudentID  int32     `gorm:"column:studentID;primary_key"`
-	Permission int64     `gorm:"column:permission"`
-	Class      int32     `gorm:"column:class"`
-	ExpTime    time.Time `gorm:"-"`
-}
 
 func Encrypt(text string, key []byte) (string, error) {
 	var iv = key[:aes.BlockSize]
@@ -61,7 +54,7 @@ func Decrypt(encrypted string, key []byte) (string, error) {
 }
 
 //保存用户信息
-func SetCookieUserInfo(c *gin.Context, userInfo UserInfo) {
+func SetCookieUserInfo(c *gin.Context, userInfo common.UserInfo) {
 	userInfo.ExpTime = time.Now().AddDate(0, 0, 14)
 	data, _ := json.Marshal(userInfo)
 	fmt.Println(string(data))
@@ -80,8 +73,8 @@ func SetCookieUserInfo(c *gin.Context, userInfo UserInfo) {
 }
 
 //读取用户信息
-func GetCookieUserInfo(c *gin.Context) (UserInfo, error) {
-	var userInfo UserInfo
+func GetCookieUserInfo(c *gin.Context) (common.UserInfo, error) {
+	var userInfo common.UserInfo
 
 	cookie, err := c.Cookie("UserInfo")
 	if err != nil {
@@ -106,7 +99,7 @@ func GetCookieUserInfo(c *gin.Context) (UserInfo, error) {
 
 //更新用户信息
 func UpdateCookieUserInfo(c *gin.Context, studentID int32) {
-	var userInfo UserInfo
+	var userInfo common.UserInfo
 	database.DB.Table("user").Where("studentID=?", studentID).Take(&userInfo)
 	userInfo.ExpTime = time.Now().AddDate(0, 0, 14)
 	data, _ := json.Marshal(userInfo)
@@ -140,8 +133,8 @@ func DelCookieUserInfo(c *gin.Context) {
 }
 
 //设置用户权限，保存在数据库中
-func SetUserPermission(studentID int32, permission int64) UserInfo {
-	var userInfo UserInfo
+func SetUserPermission(studentID int32, permission int64) common.UserInfo {
+	var userInfo common.UserInfo
 	database.DB.Table("user").Where("studentID=?", studentID).Update("Permission", permission).First(&userInfo)
 	return userInfo
 }

@@ -47,6 +47,18 @@ var PartyMap = map[string]string{
 	"test": "6",
 }
 
+type UserInfo struct {
+	UserID     string    `gorm:"column:userID"`
+	StudentID  int32     `gorm:"column:studentID;primary_key"`
+	Permission int64     `gorm:"column:permission"`
+	Class      int32     `gorm:"column:class"`
+	ExpTime    time.Time `gorm:"-"`
+}
+
+func (UserInfo) TableName() string {
+	return "user"
+}
+
 func HttpGet(url string) string {
 	res, err := http.Get(url)
 	if err != nil {

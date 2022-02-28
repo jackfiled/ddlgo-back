@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"ddl/common"
 	"ddl/config"
 	"ddl/database"
 	"ddl/wecom"
@@ -8,10 +9,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
-
-func (UserInfo) TableName() string {
-	return "user"
-}
 
 func WechatLoginHandler(c *gin.Context) {
 	// fmt.Println(values)
@@ -43,7 +40,7 @@ func LoginHandler(c *gin.Context) {
 	key := c.Request.FormValue("key")
 	pass := LoginPassword(c, key)
 	if pass {
-		c.JSON(200, UserInfo{Permission: config.AdminKey[key]})
+		c.JSON(200, config.AdminKey[key])
 	} else {
 		c.JSON(200, false)
 	}
@@ -67,7 +64,7 @@ func LogoutHandler(c *gin.Context) {
 
 }
 
-func GetUserInfo(userID string) (userInfo UserInfo) {
+func GetUserInfo(userID string) (userInfo common.UserInfo) {
 	database.DB.Where("userID=?", userID).First(&userInfo)
 	// fmt.Println(userInfo)
 	return
@@ -77,9 +74,8 @@ func GetUserInfo(userID string) (userInfo UserInfo) {
 
 func LoginPassword(c *gin.Context, key string) bool {
 
-	permission, exist := config.AdminKey[key]
+	userInfo, exist := config.AdminKey[key]
 	if exist {
-		userInfo := UserInfo{Permission: permission}
 		SetCookieUserInfo(c, userInfo)
 	}
 	return exist

@@ -4,6 +4,7 @@ import (
 	"ddl/auth"
 	"ddl/common"
 	"ddl/database"
+	"ddl/push"
 	"errors"
 	"fmt"
 	"net/http"
@@ -43,14 +44,20 @@ func SaveHandler(c *gin.Context) {
 			return
 		}
 	default:
-		if "2021211"+data.Class != strconv.Itoa(int(userInfo.Class)) {
+		fmt.Println(data.Class)
+		if userInfo.Class != -1 && "2021211"+data.Class != strconv.Itoa(int(userInfo.Class)) {
 			c.String(http.StatusBadRequest, "权限不足")
 			return
 		}
-		if userInfo.Permission&(1<<16<<int64(data.NoticeType)) == 0 {
+		if userInfo.Permission&(1<<20<<int64(data.NoticeType)) == 0 {
 			c.String(http.StatusBadRequest, "权限不足")
 			return
 		}
+	}
+
+	title := data.Title
+	if data.Index != 0 {
+		title = "【修改】" + title
 	}
 
 	err = database.DB.Save(&data).Error
@@ -59,13 +66,13 @@ func SaveHandler(c *gin.Context) {
 		return
 	}
 
-	title := data.Title
-	if data.Index != 0 {
-		title = "【修改】" + title
+	startTime := ""
+	if data.StartTime != nil {
+		startTime = data.StartTime.Format("2006-01-02 15:04")
 	}
-	// push.SendNotice(common.PartyMap[form.Get("class")], notice.NoticeType, title,
-	// 	form.Get("startTime")+"--"+form.Get("ddl"), notice.Detail,
-	// 	"http://www.squidward.top/?cla="+form.Get("class")+"#"+strconv.Itoa(notice.Index))
+	push.SendNotice(common.PartyMap[data.Class], data.NoticeType, title,
+		startTime+"--"+data.DDL.Format("2006-01-02 15:04"), data.Detail,
+		"http://www.squidward.top/#/home/"+data.Class+"/"+strconv.Itoa(data.Index))
 	_ = title
 	c.JSON(200, data)
 }
