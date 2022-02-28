@@ -22,8 +22,8 @@ package config
 
 // //密码登录
 // var AdminKey = map[string]int64{
-// 	"admin":    267387135,
-// 	"12345678": 0,
+// 	"admin":    {Permission: 267387135, Class: -1, UserID: "超级管理员"},
+// 	"12345678": {Permission: 0, Class: 0, UserID: "什么权限也没有"},,
 // }
 
 // const WEB_ADDR string = ":"
