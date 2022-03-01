@@ -10,6 +10,8 @@ require (
 
 require (
 	github.com/gin-gonic/gin v1.7.7
+	github.com/go-basic/uuid v1.0.0
+	github.com/gorilla/websocket v1.5.0
 	github.com/lib/pq v1.2.0 // indirect
 	github.com/mattn/go-sqlite3 v1.14.6 // indirect
 	golang.org/x/sys v0.0.0-20210809222454-d867a43fc93e // indirect

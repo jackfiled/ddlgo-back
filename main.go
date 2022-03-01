@@ -36,6 +36,10 @@ func main() {
 	router.POST("/api/login", auth.LoginHandler)
 	router.GET("/api/logout", auth.LogoutHandler)
 
+	router.GET("/api/qrcode_login", auth.QRCodeLoginHandler)
+	router.GET("/api/qrcode_wechat_login", auth.QRCodeWechatLoginHandler)
+	router.Any("/api/qrcodews", auth.QRCodeWSHandler)
+
 	router.GET("/WW_verify_udfdZsIBL9yNi4SN.txt", WWVerify)
 
 	router.GET("/api/check_auth", auth.CheckAuthHandler)
@@ -49,7 +53,13 @@ func main() {
 	router.DELETE("/api/delete", admin.DeleteHandler)
 	router.POST("/api/upload_img", admin.UploadFileHandler)
 
-	router.Run(config.WEB_ADDR)
+	go auth.QRCodeWSHeatBeat()
+
+	if os.Getenv("DEBUG") != "" {
+		router.Run(":3004")
+	} else {
+		router.Run(config.WEB_ADDR)
+	}
 }
 
 func indexHandler(c *gin.Context) {
