@@ -112,7 +112,7 @@ func DeleteHandler(c *gin.Context) {
 		return
 	}
 
-	switch class {
+	switch notice.Class {
 	case "":
 		c.String(http.StatusBadRequest, err.Error())
 		return
@@ -122,11 +122,12 @@ func DeleteHandler(c *gin.Context) {
 			return
 		}
 	default:
-		if "2021211"+class != strconv.Itoa(int(userInfo.Class)) {
+		fmt.Println(notice.Class)
+		if userInfo.Class != -1 && "2021211"+notice.Class != strconv.Itoa(int(userInfo.Class)) {
 			c.String(http.StatusBadRequest, "权限不足")
 			return
 		}
-		if userInfo.Permission&(1<<16<<int64(notice.NoticeType)) == 0 {
+		if userInfo.Permission&(1<<20<<int64(notice.NoticeType)) == 0 {
 			c.String(http.StatusBadRequest, "权限不足")
 			return
 		}
