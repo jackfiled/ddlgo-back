@@ -1,0 +1,6 @@
+# Goland Setting
+.idea/
+
+# Binary file
+go_build_*
+ddlBackend
