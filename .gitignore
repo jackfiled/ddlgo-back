@@ -4,3 +4,6 @@
 # Binary file
 go_build_*
 ddlBackend
+
+# Database File
+*.db

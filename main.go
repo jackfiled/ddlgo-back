@@ -2,6 +2,7 @@ package main
 
 import (
 	"ddlBackend/database"
+	"ddlBackend/handlers"
 	"ddlBackend/log"
 	"github.com/gin-gonic/gin"
 )
@@ -15,6 +16,9 @@ func main() {
 	}
 
 	route := gin.Default()
+
+	route.GET("/ddlNotices", handlers.ReadDDLHandler)
+	route.POST("/ddlNotices", handlers.CreateDDLHandler)
 
 	err = route.Run()
 	if err != nil {

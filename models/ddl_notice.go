@@ -1,20 +1,19 @@
 package models
 
 import (
-	"gorm.io/gorm"
 	"time"
 )
 
 // DDLNotice DDL事件模型
 type DDLNotice struct {
-	// gorm约定
-	gorm.Model
+	// 数据库事件编号
+	ID uint `gorm:"primaryKey" json:"id"`
 	// Title DDL事件的标题
-	Title string
+	Title string `json:"title"`
 	// Detail DDL事件的详情
-	Detail string
+	Detail string `json:"detail"`
 	// DDLTime DDL时间
-	DDLTime time.Time
+	DDLTime time.Time `json:"ddl_time"`
 	// NoticeType DDL的分类
-	NoticeType int
+	NoticeType int `json:"notice_type"`
 }
