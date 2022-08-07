@@ -1,22 +1,24 @@
 package main
 
 import (
-	"fmt"
+	"ddlBackend/database"
+	"ddlBackend/log"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
+	// 打开数据库
+	err := database.OpenDatabase()
+	if err != nil {
+		log.DDLLog(err.Error())
+		return
+	}
+
 	route := gin.Default()
 
-	route.GET("/ping", func(context *gin.Context) {
-		context.JSONP(200, gin.H{
-			"message": "pong",
-		})
-	})
-
-	err := route.Run()
+	err = route.Run()
 	if err != nil {
-		fmt.Println(err.Error())
+		log.DDLLog(err.Error())
 		return
 	}
 }
