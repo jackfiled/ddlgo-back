@@ -16,4 +16,6 @@ type DDLNotice struct {
 	DDLTime time.Time `json:"ddl_time"`
 	// NoticeType DDL的分类
 	NoticeType int `json:"notice_type"`
+	// ClassName 班级名称
+	ClassName string `json:"class_name"`
 }

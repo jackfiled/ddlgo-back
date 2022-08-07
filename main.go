@@ -20,6 +20,9 @@ func main() {
 	route.GET("/ddlNotices", handlers.ReadDDLHandler)
 	route.POST("/ddlNotices", handlers.CreateDDLHandler)
 
+	route.GET("/ddlNotices/:class", handlers.ReadClassDDLHandler)
+	route.POST("/ddlNotices/:class", handlers.CreateClassDDLHandler)
+
 	err = route.Run()
 	if err != nil {
 		log.DDLLog(err.Error())
