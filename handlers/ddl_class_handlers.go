@@ -5,6 +5,7 @@ import (
 	"ddlBackend/log"
 	"ddlBackend/models"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 	"net/http"
 	"strconv"
 )
@@ -16,6 +17,8 @@ func CreateClassDDLHandler(context *gin.Context) {
 	var ddlNotice models.DDLNotice
 	err := context.ShouldBindJSON(&ddlNotice)
 	if err != nil {
+		// 请求体绑定失败
+		// 返回 400 错误请求
 		log.DDLLog(err.Error())
 		context.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -24,14 +27,30 @@ func CreateClassDDLHandler(context *gin.Context) {
 	}
 
 	if className != ddlNotice.ClassName {
+		// 请求url和请求体中班级不符
+		// 返回 400 错误请求
 		context.JSON(http.StatusBadRequest, gin.H{
 			"error": "the url and the body are not the same",
 		})
 		return
 	}
 
-	result := database.Database.Table("ddl_notices").Create(&ddlNotice)
+	var db *gorm.DB
+	db, err = database.GetDDLTable(className)
+	if err != nil {
+		// 无法获取对应班级的数据库
+		// 返回 400 错误请求
+		log.DDLLog(err.Error())
+		context.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	result := db.Create(&ddlNotice)
 	if result.Error != nil {
+		// 在数据库中创建失败
+		// 返回 500 服务器错误
 		log.DDLLog(result.Error.Error())
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error": result.Error.Error(),
@@ -57,6 +76,8 @@ func ReadClassDDLHandler(context *gin.Context) {
 	startNum, err = strconv.Atoi(start)
 	stepNum, err = strconv.Atoi(step)
 	if err != nil {
+		// 请求参数转换失败
+		// 返回 400 错误请求
 		log.DDLLog(err.Error())
 		context.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -65,7 +86,19 @@ func ReadClassDDLHandler(context *gin.Context) {
 	}
 
 	var ddlNotices []models.DDLNotice
-	database.Database.Table("ddl_notices").Order("ddl_time DESC").Offset(startNum).Limit(stepNum).Where("class_name = ? AND notice_type = ?", className, noticeType).Find(&ddlNotices)
+	var db *gorm.DB
+	db, err = database.GetDDLTable(className)
+	if err != nil {
+		// 无法获取对应班级的数据库
+		// 返回 400 错误请求
+		log.DDLLog(err.Error())
+		context.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	db.Where("notice_type = ?", noticeType).Offset(startNum).Limit(stepNum).Find(&ddlNotices)
 	context.JSON(http.StatusOK, ddlNotices)
 	return
 }

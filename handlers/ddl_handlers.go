@@ -5,6 +5,7 @@ import (
 	"ddlBackend/log"
 	"ddlBackend/models"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 	"net/http"
 	"strconv"
 )
@@ -24,7 +25,19 @@ func CreateDDLHandler(context *gin.Context) {
 		return
 	}
 
-	result := database.Database.Create(&ddlNotice)
+	var db *gorm.DB
+	db, err = database.GetDDLTable(ddlNotice.ClassName)
+	if err != nil {
+		// 获取对应班级数据库失败
+		// 返回 400 错误请求
+		log.DDLLog(err.Error())
+		context.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	result := db.Create(&ddlNotice)
 	if result.Error != nil {
 		// 在数据库中创建失败
 		// 返回 500 服务器错误
@@ -32,6 +45,7 @@ func CreateDDLHandler(context *gin.Context) {
 		context.JSONP(http.StatusInternalServerError, gin.H{
 			"error": result.Error.Error(),
 		})
+		return
 	}
 
 	context.JSON(http.StatusCreated, ddlNotice)
@@ -50,6 +64,8 @@ func ReadDDLHandler(context *gin.Context) {
 	startNum, err = strconv.Atoi(start)
 	stepNum, err = strconv.Atoi(step)
 	if err != nil {
+		// 请求参数转换失败
+		// 返回 400 错误请求
 		log.DDLLog(err.Error())
 		context.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -58,7 +74,12 @@ func ReadDDLHandler(context *gin.Context) {
 	}
 
 	var ddlNotices []models.DDLNotice
-	database.Database.Table("ddl_notices").Order("ddl_time DESC").Where("notice_type = ?", noticeType).Offset(startNum).Limit(stepNum).Find(&ddlNotices)
+	for _, value := range database.DDLTables {
+		db, _ := database.GetDDLTable(value)
+		var list []models.DDLNotice
+		db.Where("notice_type = ?", noticeType).Offset(startNum).Limit(stepNum).Find(&list)
+		ddlNotices = append(ddlNotices, list...)
+	}
 
 	context.JSON(http.StatusOK, ddlNotices)
 	return
