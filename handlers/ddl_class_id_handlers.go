@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"ddlBackend/database"
-	"ddlBackend/log"
 	"ddlBackend/models"
+	"ddlBackend/tool"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -21,7 +21,7 @@ func ReadClassIDDDLHandler(context *gin.Context) {
 	if err != nil {
 		// 获取指定班级的数据库失败
 		// 返回 400 错误请求
-		log.DDLLog(err.Error())
+		tool.DDLLog(err.Error())
 		context.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
@@ -33,7 +33,7 @@ func ReadClassIDDDLHandler(context *gin.Context) {
 	if err != nil {
 		// 转换id字符串失败
 		// 返回 400 请求错误
-		log.DDLLog(err.Error())
+		tool.DDLLog(err.Error())
 		context.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
@@ -62,7 +62,7 @@ func UpdateClassIDDDLHandler(context *gin.Context) {
 	if err != nil {
 		// 获取指定班级的数据库失败
 		// 返回 400 错误请求
-		log.DDLLog(err.Error())
+		tool.DDLLog(err.Error())
 		context.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
@@ -74,7 +74,7 @@ func UpdateClassIDDDLHandler(context *gin.Context) {
 	if err != nil {
 		// 转换id字符串失败
 		// 返回 400 请求错误
-		log.DDLLog(err.Error())
+		tool.DDLLog(err.Error())
 		context.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
@@ -97,7 +97,7 @@ func UpdateClassIDDDLHandler(context *gin.Context) {
 	if err != nil {
 		// 绑定请求体失败
 		// 返回 400 请求错误
-		log.DDLLog(err.Error())
+		tool.DDLLog(err.Error())
 		context.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
@@ -128,7 +128,7 @@ func DeleteClassIDDDLHandler(context *gin.Context) {
 	if err != nil {
 		// 获取指定班级的数据库失败
 		// 返回 400 错误请求
-		log.DDLLog(err.Error())
+		tool.DDLLog(err.Error())
 		context.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
@@ -140,7 +140,7 @@ func DeleteClassIDDDLHandler(context *gin.Context) {
 	if err != nil {
 		// 转换id字符串失败
 		// 返回 400 请求错误
-		log.DDLLog(err.Error())
+		tool.DDLLog(err.Error())
 		context.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})

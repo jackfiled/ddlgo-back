@@ -1,8 +1,7 @@
-package config
+package tool
 
 import (
 	"bufio"
-	"ddlBackend/log"
 	"encoding/json"
 	"os"
 )
@@ -26,7 +25,7 @@ func ReadConfig() error {
 		err := file.Close()
 		if err != nil {
 			// 关闭文件中错误
-			log.DDLLog(err.Error())
+			DDLLog(err.Error())
 		}
 	}(file)
 

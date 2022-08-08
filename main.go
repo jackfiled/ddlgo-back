@@ -1,25 +1,24 @@
 package main
 
 import (
-	"ddlBackend/config"
 	"ddlBackend/database"
 	"ddlBackend/handlers"
-	"ddlBackend/log"
+	"ddlBackend/tool"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	// 读取配置文件
-	err := config.ReadConfig()
+	err := tool.ReadConfig()
 	if err != nil {
-		log.DDLLog(err.Error())
-		log.DDLLog("Read config file failed, using default setting")
+		tool.DDLLog(err.Error())
+		tool.DDLLog("Read config file failed, using default setting")
 	}
 
 	// 打开数据库
 	err = database.OpenDatabase()
 	if err != nil {
-		log.DDLLog(err.Error())
+		tool.DDLLog(err.Error())
 		return
 	}
 
@@ -35,9 +34,9 @@ func main() {
 	route.PUT("/ddlNotices/:class/:id", handlers.UpdateClassIDDDLHandler)
 	route.DELETE("/ddlNotices/:class/:id", handlers.DeleteClassIDDDLHandler)
 
-	err = route.Run(config.Setting.AppPort)
+	err = route.Run(tool.Setting.AppPort)
 	if err != nil {
-		log.DDLLog(err.Error())
+		tool.DDLLog(err.Error())
 		return
 	}
 }
