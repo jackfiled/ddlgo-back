@@ -7,3 +7,6 @@ ddlBackend
 
 # Database File
 *.db
+
+# Setting File
+config.json

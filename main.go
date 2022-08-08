@@ -1,6 +1,7 @@
 package main
 
 import (
+	"ddlBackend/config"
 	"ddlBackend/database"
 	"ddlBackend/handlers"
 	"ddlBackend/log"
@@ -8,8 +9,15 @@ import (
 )
 
 func main() {
+	// 读取配置文件
+	err := config.ReadConfig()
+	if err != nil {
+		log.DDLLog(err.Error())
+		log.DDLLog("Read config file failed, using default setting")
+	}
+
 	// 打开数据库
-	err := database.OpenDatabase()
+	err = database.OpenDatabase()
 	if err != nil {
 		log.DDLLog(err.Error())
 		return
@@ -27,7 +35,7 @@ func main() {
 	route.PUT("/ddlNotices/:class/:id", handlers.UpdateClassIDDDLHandler)
 	route.DELETE("/ddlNotices/:class/:id", handlers.DeleteClassIDDDLHandler)
 
-	err = route.Run()
+	err = route.Run(config.Setting.AppPort)
 	if err != nil {
 		log.DDLLog(err.Error())
 		return
