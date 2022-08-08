@@ -64,7 +64,7 @@ func CreateClassDDLHandler(context *gin.Context) {
 
 // ReadClassDDLHandler 班级url下读取DDL事件处理函数
 func ReadClassDDLHandler(context *gin.Context) {
-	className := context.Query("class")
+	className := context.Param("class")
 
 	start := context.DefaultQuery("start", "0")
 	step := context.DefaultQuery("step", "20")
