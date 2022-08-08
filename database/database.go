@@ -31,6 +31,14 @@ func OpenDatabase() (err error) {
 		}
 	}
 
+	// 创建用户表
+	if !Database.Migrator().HasTable(&models.UserInformation{}) {
+		err = Database.AutoMigrate(&models.UserInformation{})
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
