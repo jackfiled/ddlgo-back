@@ -7,11 +7,13 @@ import (
 )
 
 type Config struct {
-	AppPort string `json:"app_port"`
+	AppPort   string `json:"app_port"`
+	JWTSecret string `json:"jwt_secret"`
 }
 
 var DefaultSetting = Config{
-	AppPort: ":8080",
+	AppPort:   ":8080",
+	JWTSecret: "MakeBuptGreatAgain",
 }
 
 // Setting 配置文件对象
