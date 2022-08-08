@@ -34,6 +34,12 @@ func main() {
 	route.PUT("/ddlNotices/:class/:id", handlers.UpdateClassIDDDLHandler)
 	route.DELETE("/ddlNotices/:class/:id", handlers.DeleteClassIDDDLHandler)
 
+	route.GET("/users", handlers.ReadUsersHandler)
+	route.POST("/users", handlers.CreateUserHandler)
+	route.GET("/users/:id", handlers.ReadSingleUserHandler)
+	route.PUT("/users/:id", handlers.UpdateUserHandler)
+	route.DELETE("/users/:id", handlers.DeleteUserHandler)
+
 	err = route.Run(tool.Setting.AppPort)
 	if err != nil {
 		tool.DDLLog(err.Error())
