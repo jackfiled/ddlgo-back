@@ -2,6 +2,7 @@ package database
 
 import (
 	"ddlBackend/models"
+	"ddlBackend/tool"
 	"errors"
 	"fmt"
 	"gorm.io/driver/sqlite"
@@ -37,6 +38,13 @@ func OpenDatabase() (err error) {
 		if err != nil {
 			return err
 		}
+	}
+
+	// 将配置文件中设置的根管理员存入数据库
+	_, err = AdminLogin(tool.Setting.RootConfig.Username, tool.Setting.RootConfig.Password)
+	if err != nil {
+		// 引发没有找到的错误
+		Database.Table("user_informations").Create(&tool.Setting.RootConfig)
 	}
 
 	return nil

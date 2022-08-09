@@ -2,7 +2,6 @@ package tool
 
 import (
 	"bufio"
-	"ddlBackend/database"
 	"ddlBackend/models"
 	"encoding/json"
 	"os"
@@ -57,13 +56,6 @@ func ReadConfig() error {
 		// 采用默认配置
 		Setting = DefaultSetting
 		return err
-	}
-
-	// 将配置文件中指定的Root管理员存入数据库
-	_, err = database.AdminLogin(Setting.RootConfig.Username, Setting.RootConfig.Password)
-	if err != nil {
-		// 如果登录失败 说明数据库中没有该Root用户 则添加
-		database.Database.Table("user_informations").Create(&Setting.RootConfig)
 	}
 
 	return nil

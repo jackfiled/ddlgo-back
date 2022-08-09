@@ -25,6 +25,8 @@ func main() {
 
 	route := gin.Default()
 
+	route.POST("/login", handlers.AdminLoginHandler)
+
 	route.GET("/ddlNotices", handlers.ReadDDLHandler)
 	route.POST("/ddlNotices", handlers.CreateDDLHandler)
 
@@ -36,12 +38,15 @@ func main() {
 	route.DELETE("/ddlNotices/:class/:id", handlers.DeleteClassIDDDLHandler)
 
 	// 用户管理相关API需要验证
-	route.GET("/users", handlers.ReadUsersHandler).Use(Middleware.JWTAuthMiddleware())
-	route.POST("/users", handlers.CreateUserHandler).Use(Middleware.JWTAuthMiddleware())
-	route.GET("/users/:id", handlers.ReadSingleUserHandler).Use(Middleware.JWTAuthMiddleware())
-	route.PUT("/users/:id", handlers.UpdateUserHandler).Use(Middleware.JWTAuthMiddleware())
-	route.DELETE("/users/:id", handlers.DeleteUserHandler).Use(Middleware.JWTAuthMiddleware())
-	route.POST("/users/login", handlers.AdminLoginHandler)
+	userRoute := route.Group("/users")
+	userRoute.Use(Middleware.JWTAuthMiddleware())
+	{
+		userRoute.GET("/", handlers.ReadUsersHandler)
+		userRoute.POST("/", handlers.CreateUserHandler)
+		userRoute.GET("/:id", handlers.ReadSingleUserHandler)
+		userRoute.PUT("/:id", handlers.UpdateUserHandler)
+		userRoute.DELETE("/:id", handlers.DeleteUserHandler)
+	}
 
 	err = route.Run(tool.Setting.AppPort)
 	if err != nil {

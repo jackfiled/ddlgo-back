@@ -27,13 +27,13 @@ func GenerateJWTToken(info models.UserInformation) (string, error) {
 	}
 
 	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return tokenClaims.SignedString(Setting.JWTSecret)
+	return tokenClaims.SignedString([]byte(Setting.JWTSecret))
 }
 
 // ParseJWTToken 解析令牌并返回其中的信息
 func ParseJWTToken(token string) (*models.JWTClaims, error) {
 	tokenClaims, err := jwt.ParseWithClaims(token, &models.JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return Setting.JWTSecret, nil
+		return []byte(Setting.JWTSecret), nil
 	})
 
 	if tokenClaims != nil {
