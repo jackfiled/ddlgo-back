@@ -25,17 +25,21 @@ func main() {
 
 	route := gin.Default()
 
+	// 登录
 	route.POST("/login", handlers.AdminLoginHandler)
-
+	// 获取DDL事件列表
 	route.GET("/ddlNotices", handlers.ReadDDLHandler)
-	route.POST("/ddlNotices", handlers.CreateDDLHandler)
-
 	route.GET("/ddlNotices/:class", handlers.ReadClassDDLHandler)
-	route.POST("/ddlNotices/:class", handlers.CreateClassDDLHandler)
-
 	route.GET("/ddlNotices/:class/:id", handlers.ReadClassIDDDLHandler)
-	route.PUT("/ddlNotices/:class/:id", handlers.UpdateClassIDDDLHandler)
-	route.DELETE("/ddlNotices/:class/:id", handlers.DeleteClassIDDDLHandler)
+
+	ddlNoticesRoute := route.Group("")
+	ddlNoticesRoute.Use(Middleware.JWTAuthMiddleware())
+	{
+		ddlNoticesRoute.POST("/ddlNotices", handlers.CreateDDLHandler)
+		ddlNoticesRoute.POST("/ddlNotices/:class", handlers.CreateClassDDLHandler)
+		ddlNoticesRoute.PUT("/ddlNotices/:class/:id", handlers.UpdateClassIDDDLHandler)
+		ddlNoticesRoute.DELETE("/ddlNotices/:class/:id", handlers.DeleteClassIDDDLHandler)
+	}
 
 	// 用户管理相关API需要验证
 	userRoute := route.Group("/users")

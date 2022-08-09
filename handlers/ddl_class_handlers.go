@@ -14,8 +14,23 @@ import (
 func CreateClassDDLHandler(context *gin.Context) {
 	className := context.Param("class")
 
+	ok, err := checkClassAdminPermission(context, className)
+	if err != nil {
+		// 解析令牌和验证权限中遇到问题
+		// 返回 500 服务器错误
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	if !ok {
+		context.JSON(http.StatusUnauthorized, gin.H{})
+		return
+	}
+
 	var ddlNotice models.DDLNotice
-	err := context.ShouldBindJSON(&ddlNotice)
+	err = context.ShouldBindJSON(&ddlNotice)
 	if err != nil {
 		// 请求体绑定失败
 		// 返回 400 错误请求
@@ -101,4 +116,19 @@ func ReadClassDDLHandler(context *gin.Context) {
 	db.Where("notice_type = ?", noticeType).Offset(startNum).Limit(stepNum).Find(&ddlNotices)
 	context.JSON(http.StatusOK, ddlNotices)
 	return
+}
+
+// checkClassAdminPermission 检查当前请求令牌的持有者是否有权限修改当前班级的内容
+func checkClassAdminPermission(context *gin.Context, classname string) (bool, error) {
+	claims, err := tool.GetClaimsInContext(context)
+
+	if err != nil {
+		return false, err
+	}
+
+	if claims.Classname == classname && claims.Permission >= models.Administrator {
+		return true, nil
+	} else {
+		return false, nil
+	}
 }

@@ -41,7 +41,7 @@ func ReadClassIDDDLHandler(context *gin.Context) {
 	}
 
 	var ddlNotice models.DDLNotice
-	result := db.Where("id = ?", idNum).Find(&ddlNotice)
+	result := db.First(&ddlNotice, idNum)
 	if result.Error != nil {
 		context.JSON(http.StatusNotFound, gin.H{
 			"error": result.Error.Error(),
@@ -56,8 +56,22 @@ func UpdateClassIDDDLHandler(context *gin.Context) {
 	className := context.Param("class")
 	id := context.Param("id")
 
+	ok, err := checkClassAdminPermission(context, className)
+	if err != nil {
+		// 解析令牌和验证权限中遇到问题
+		// 返回 500 服务器错误
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	if !ok {
+		context.JSON(http.StatusUnauthorized, gin.H{})
+		return
+	}
+
 	var db *gorm.DB
-	var err error
 	db, err = database.GetDDLTable(className)
 	if err != nil {
 		// 获取指定班级的数据库失败
@@ -82,7 +96,7 @@ func UpdateClassIDDDLHandler(context *gin.Context) {
 	}
 
 	var ddlNotice models.DDLNotice
-	result := db.Where("id = ?", idNum).Find(&ddlNotice)
+	result := db.First(&ddlNotice, idNum)
 
 	if result.Error != nil {
 		// 读取指定的事件失败
@@ -122,8 +136,22 @@ func DeleteClassIDDDLHandler(context *gin.Context) {
 	className := context.Param("class")
 	id := context.Param("id")
 
+	ok, err := checkClassAdminPermission(context, className)
+	if err != nil {
+		// 解析令牌和验证权限中遇到问题
+		// 返回 500 服务器错误
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	if !ok {
+		context.JSON(http.StatusUnauthorized, gin.H{})
+		return
+	}
+
 	var db *gorm.DB
-	var err error
 	db, err = database.GetDDLTable(className)
 	if err != nil {
 		// 获取指定班级的数据库失败
@@ -148,7 +176,7 @@ func DeleteClassIDDDLHandler(context *gin.Context) {
 	}
 
 	var ddlNotice models.DDLNotice
-	result := db.Where("id = ?", idNum).Find(&ddlNotice)
+	result := db.First(&ddlNotice, idNum)
 
 	if result.Error != nil {
 		// 读取指定的事件失败

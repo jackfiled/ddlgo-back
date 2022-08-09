@@ -12,9 +12,26 @@ import (
 
 // CreateDDLHandler 创建DDL事件处理函数
 func CreateDDLHandler(context *gin.Context) {
+	ok, err := tool.CheckPermission(context, models.Root)
+	if err != nil {
+		// 验证身份中出错
+		// 返回 500 服务器错误
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	if !ok {
+		// 验证未通过
+		// 返回 401 未授权错误
+		context.JSON(http.StatusUnauthorized, gin.H{})
+		return
+	}
+
 	var ddlNotice models.DDLNotice
 
-	err := context.ShouldBindJSON(&ddlNotice)
+	err = context.ShouldBindJSON(&ddlNotice)
 	if err != nil {
 		// 绑定json数据失败
 		// 返回 400 错误请求
