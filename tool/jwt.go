@@ -2,7 +2,9 @@ package tool
 
 import (
 	"ddlBackend/models"
+	"errors"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
 	"time"
 )
 
@@ -44,4 +46,34 @@ func ParseJWTToken(token string) (*models.JWTClaims, error) {
 	}
 
 	return nil, err
+}
+
+// GetClaimsInContext 获得HTTP上下文中的JWT令牌信息
+func GetClaimsInContext(context *gin.Context) (*models.JWTClaims, error) {
+	value, exist := context.Get("Claims")
+	if !exist {
+		// 没有找到令牌信息
+		return nil, errors.New("no JWT claims")
+	}
+
+	claims, ok := value.(models.JWTClaims)
+	if !ok {
+		return nil, errors.New("can not read claims")
+	}
+
+	return &claims, nil
+}
+
+// CheckPermission 验证请求者的权限
+func CheckPermission(context *gin.Context, permission uint) (bool, error) {
+	claims, err := GetClaimsInContext(context)
+	if err != nil {
+		return false, err
+	}
+
+	if claims.Permission >= permission {
+		return true, nil
+	} else {
+		return false, nil
+	}
 }

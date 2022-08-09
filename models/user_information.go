@@ -15,3 +15,9 @@ type UserInformation struct {
 	// Permission 权限
 	Permission uint `json:"permission"`
 }
+
+// AdminLoginModel 管理员登录JSON模型
+type AdminLoginModel struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"ddlBackend/Middleware"
 	"ddlBackend/database"
 	"ddlBackend/handlers"
 	"ddlBackend/tool"
@@ -34,11 +35,13 @@ func main() {
 	route.PUT("/ddlNotices/:class/:id", handlers.UpdateClassIDDDLHandler)
 	route.DELETE("/ddlNotices/:class/:id", handlers.DeleteClassIDDDLHandler)
 
-	route.GET("/users", handlers.ReadUsersHandler)
-	route.POST("/users", handlers.CreateUserHandler)
-	route.GET("/users/:id", handlers.ReadSingleUserHandler)
-	route.PUT("/users/:id", handlers.UpdateUserHandler)
-	route.DELETE("/users/:id", handlers.DeleteUserHandler)
+	// 用户管理相关API需要验证
+	route.GET("/users", handlers.ReadUsersHandler).Use(Middleware.JWTAuthMiddleware())
+	route.POST("/users", handlers.CreateUserHandler).Use(Middleware.JWTAuthMiddleware())
+	route.GET("/users/:id", handlers.ReadSingleUserHandler).Use(Middleware.JWTAuthMiddleware())
+	route.PUT("/users/:id", handlers.UpdateUserHandler).Use(Middleware.JWTAuthMiddleware())
+	route.DELETE("/users/:id", handlers.DeleteUserHandler).Use(Middleware.JWTAuthMiddleware())
+	route.POST("/users/login", handlers.AdminLoginHandler)
 
 	err = route.Run(tool.Setting.AppPort)
 	if err != nil {
