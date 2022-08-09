@@ -51,3 +51,14 @@ func GetDDLTable(className string) (*gorm.DB, error) {
 	}
 	return nil, errors.New(fmt.Sprintf("The table named %s not exists", className))
 }
+
+// AdminLogin 管理员登录验证函数
+func AdminLogin(username string, password string) (*models.UserInformation, error) {
+	var user models.UserInformation
+	result := Database.Table("user_informations").Where("username = ? AND password = ?", username, password).First(&user)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &user, nil
+}

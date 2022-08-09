@@ -2,18 +2,29 @@ package tool
 
 import (
 	"bufio"
+	"ddlBackend/database"
+	"ddlBackend/models"
 	"encoding/json"
 	"os"
 )
 
 type Config struct {
-	AppPort   string `json:"app_port"`
-	JWTSecret string `json:"jwt_secret"`
+	AppPort    string                 `json:"app_port"`
+	JWTSecret  string                 `json:"jwt_secret"`
+	RootConfig models.UserInformation `json:"root_config"`
 }
 
+// DefaultSetting 默认配置文件
 var DefaultSetting = Config{
 	AppPort:   ":8080",
 	JWTSecret: "MakeBuptGreatAgain",
+	RootConfig: models.UserInformation{
+		Username:   "root",
+		Password:   "123456",
+		Classname:  "dddd",
+		StudentID:  "0000000000",
+		Permission: models.Root,
+	},
 }
 
 // Setting 配置文件对象
@@ -46,6 +57,13 @@ func ReadConfig() error {
 		// 采用默认配置
 		Setting = DefaultSetting
 		return err
+	}
+
+	// 将配置文件中指定的Root管理员存入数据库
+	_, err = database.AdminLogin(Setting.RootConfig.Username, Setting.RootConfig.Password)
+	if err != nil {
+		// 如果登录失败 说明数据库中没有该Root用户 则添加
+		database.Database.Table("user_informations").Create(&Setting.RootConfig)
 	}
 
 	return nil
