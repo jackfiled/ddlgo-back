@@ -35,7 +35,7 @@ func CreateDDLHandler(context *gin.Context) {
 	if err != nil {
 		// 绑定json数据失败
 		// 返回 400 错误请求
-		tool.DDLLog(err.Error())
+		tool.DDLLogError(err.Error())
 		context.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
@@ -47,7 +47,7 @@ func CreateDDLHandler(context *gin.Context) {
 	if err != nil {
 		// 获取对应班级数据库失败
 		// 返回 400 错误请求
-		tool.DDLLog(err.Error())
+		tool.DDLLogError(err.Error())
 		context.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
@@ -58,7 +58,7 @@ func CreateDDLHandler(context *gin.Context) {
 	if result.Error != nil {
 		// 在数据库中创建失败
 		// 返回 500 服务器错误
-		tool.DDLLog(result.Error.Error())
+		tool.DDLLogError(result.Error.Error())
 		context.JSONP(http.StatusInternalServerError, gin.H{
 			"error": result.Error.Error(),
 		})
@@ -83,7 +83,7 @@ func ReadDDLHandler(context *gin.Context) {
 	if err != nil {
 		// 请求参数转换失败
 		// 返回 400 错误请求
-		tool.DDLLog(err.Error())
+		tool.DDLLogError(err.Error())
 		context.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})

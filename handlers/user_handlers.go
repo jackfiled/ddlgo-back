@@ -34,7 +34,7 @@ func ReadUsersHandler(context *gin.Context) {
 	result := database.Database.Table("user_informations").Find(&users)
 	if result.Error != nil {
 		// 如果读取中出错
-		tool.DDLLog(result.Error.Error())
+		tool.DDLLogError(result.Error.Error())
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error": result.Error.Error(),
 		})
@@ -69,7 +69,7 @@ func ReadSingleUserHandler(context *gin.Context) {
 	idNum, err := strconv.Atoi(id)
 	if err != nil {
 		// url中参数读取出错
-		tool.DDLLog(err.Error())
+		tool.DDLLogError(err.Error())
 		context.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
@@ -78,7 +78,7 @@ func ReadSingleUserHandler(context *gin.Context) {
 	result := database.Database.Table("user_informations").First(&user, idNum)
 	if result.Error != nil {
 		// 没找到
-		tool.DDLLog(result.Error.Error())
+		tool.DDLLogError(result.Error.Error())
 		context.JSON(http.StatusNotFound, gin.H{
 			"error": result.Error.Error(),
 		})
@@ -112,7 +112,7 @@ func CreateUserHandler(context *gin.Context) {
 	err = context.ShouldBindJSON(&user)
 	if err != nil {
 		// 绑定json对象出错
-		tool.DDLLog(err.Error())
+		tool.DDLLogError(err.Error())
 		context.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
@@ -121,7 +121,7 @@ func CreateUserHandler(context *gin.Context) {
 
 	result := database.Database.Table("user_informations").Create(&user)
 	if result.Error != nil {
-		tool.DDLLog(result.Error.Error())
+		tool.DDLLogError(result.Error.Error())
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error": result.Error.Error(),
 		})
@@ -154,7 +154,7 @@ func UpdateUserHandler(context *gin.Context) {
 	id := context.Param("id")
 	idNum, err := strconv.Atoi(id)
 	if err != nil {
-		tool.DDLLog(err.Error())
+		tool.DDLLogError(err.Error())
 		context.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
@@ -164,7 +164,7 @@ func UpdateUserHandler(context *gin.Context) {
 	var user models.UserInformation
 	err = context.ShouldBindJSON(&user)
 	if err != nil {
-		tool.DDLLog(err.Error())
+		tool.DDLLogError(err.Error())
 		context.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
@@ -206,7 +206,7 @@ func DeleteUserHandler(context *gin.Context) {
 	id := context.Param("id")
 	idNum, err := strconv.Atoi(id)
 	if err != nil {
-		tool.DDLLog(err.Error())
+		tool.DDLLogError(err.Error())
 		context.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
@@ -216,7 +216,7 @@ func DeleteUserHandler(context *gin.Context) {
 	var user models.UserInformation
 	result := database.Database.Table("user_informations").First(&user, idNum)
 	if result.Error != nil {
-		tool.DDLLog(result.Error.Error())
+		tool.DDLLogError(result.Error.Error())
 		context.JSON(http.StatusNotFound, gin.H{
 			"error": result.Error.Error(),
 		})

@@ -12,14 +12,14 @@ func main() {
 	// 读取配置文件
 	err := tool.ReadConfig()
 	if err != nil {
-		tool.DDLLog(err.Error())
-		tool.DDLLog("Read config file failed, using default setting")
+		tool.DDLLogError(err.Error())
+		tool.DDLLogError("Read config file failed, using default setting")
 	}
 
 	// 打开数据库
 	err = database.OpenDatabase()
 	if err != nil {
-		tool.DDLLog(err.Error())
+		tool.DDLLogError(err.Error())
 		return
 	}
 
@@ -65,7 +65,7 @@ func main() {
 
 	err = route.Run(tool.Setting.AppPort)
 	if err != nil {
-		tool.DDLLog(err.Error())
+		tool.DDLLogError(err.Error())
 		return
 	}
 }

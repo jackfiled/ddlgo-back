@@ -37,7 +37,7 @@ func ReadConfig() error {
 		err := file.Close()
 		if err != nil {
 			// 关闭文件中错误
-			DDLLog(err.Error())
+			DDLLogError(err.Error())
 		}
 	}(file)
 

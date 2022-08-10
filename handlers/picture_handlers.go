@@ -29,7 +29,7 @@ func UploadPictureHandler(context *gin.Context) {
 	file, err := context.FormFile("picture")
 
 	if err != nil {
-		tool.DDLLog(err.Error())
+		tool.DDLLogError(err.Error())
 		context.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
@@ -53,7 +53,7 @@ func UploadPictureHandler(context *gin.Context) {
 	fileName := "./picture/" + uuid.NewV4().String() + "." + fileEndName
 	err = context.SaveUploadedFile(file, fileName)
 	if err != nil {
-		tool.DDLLog(err.Error())
+		tool.DDLLogError(err.Error())
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})

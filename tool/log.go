@@ -5,8 +5,8 @@ import (
 	"time"
 )
 
-// DDLLog 日志记录函数
-func DDLLog(message string) {
-	now := time.Now()
-	fmt.Printf("%v  %s\n", now, message)
+// DDLLogError 记录错误日志
+func DDLLogError(message string) {
+	timeString := time.Now().Format("01-02 15:04:05")
+	fmt.Printf("%s DDL-Error: %s", timeString, message)
 }
