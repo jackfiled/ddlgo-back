@@ -10,3 +10,6 @@ ddlBackend
 
 # Setting File
 config.json
+
+# Pictures Directory
+picture/

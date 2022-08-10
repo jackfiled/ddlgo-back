@@ -32,6 +32,10 @@ func main() {
 	route.GET("/ddlNotices/:class", handlers.ReadClassDDLHandler)
 	route.GET("/ddlNotices/:class/:id", handlers.ReadClassIDDDLHandler)
 
+	// 图片文件路径
+	route.Static("/picture", "./picture")
+
+	// 修改DDL事件列表需要身份验证
 	ddlNoticesRoute := route.Group("")
 	ddlNoticesRoute.Use(Middleware.JWTAuthMiddleware())
 	{
@@ -39,6 +43,13 @@ func main() {
 		ddlNoticesRoute.POST("/ddlNotices/:class", handlers.CreateClassDDLHandler)
 		ddlNoticesRoute.PUT("/ddlNotices/:class/:id", handlers.UpdateClassIDDDLHandler)
 		ddlNoticesRoute.DELETE("/ddlNotices/:class/:id", handlers.DeleteClassIDDDLHandler)
+	}
+
+	// 其他需要身份验证的API
+	adminRoute := route.Group("")
+	adminRoute.Use(Middleware.JWTAuthMiddleware())
+	{
+		adminRoute.POST("/upload", handlers.UploadPictureHandler)
 	}
 
 	// 用户管理相关API需要验证
