@@ -240,19 +240,64 @@ func AdminLoginHandler(context *gin.Context) {
 		})
 	}
 
-	var user models.UserInformation
-	result := database.Database.Table("user_informations").Where("username = ? AND password = ?", loginModel.Username, loginModel.Password).First(&user)
-	if result.Error != nil {
-		// 数据库中查无此人
-		context.JSON(http.StatusBadRequest, gin.H{
-			"error": result.Error.Error(),
+	user, err := database.AdminLogin(loginModel.StudentID, loginModel.Password)
+	if err != nil {
+		// 数据库中查无此用户
+		context.JSON(http.StatusNotFound, gin.H{
+			"error": err.Error(),
 		})
 		return
 	}
 
-	token, err := tool.GenerateJWTToken(user)
+	token, err := tool.GenerateJWTToken(*user)
 	if err != nil {
 		// 产生JWT令牌中错误
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{
+		"token": token,
+	})
+	return
+}
+
+// UserLoginHandler 用户登录处理函数
+func UserLoginHandler(context *gin.Context) {
+	var loginModel models.UserLoginModel
+
+	err := context.ShouldBindJSON(&loginModel)
+	if err != nil {
+		// 绑定JSON出错
+		context.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	user, err := database.UserLogin(loginModel.Username, loginModel.StudentID)
+	if err != nil {
+		// 数据库中查无此人
+		context.JSON(http.StatusNotFound, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	// 如果该用户的权限大于普通用户
+	// 则不能通过学号姓名验证的方式获得令牌
+	if user.Permission > models.User {
+		context.JSON(http.StatusBadRequest, gin.H{
+			"error": "该用户身份为管理员，请通过学号密码登录",
+		})
+		return
+	}
+
+	token, err := tool.GenerateJWTToken(*user)
+	if err != nil {
+		// 产生令牌出错
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})

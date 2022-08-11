@@ -41,7 +41,7 @@ func OpenDatabase() (err error) {
 	}
 
 	// 将配置文件中设置的根管理员存入数据库
-	_, err = AdminLogin(tool.Setting.RootConfig.Username, tool.Setting.RootConfig.Password)
+	_, err = AdminLogin(tool.Setting.RootConfig.StudentID, tool.Setting.RootConfig.Password)
 	if err != nil {
 		// 引发没有找到的错误
 		Database.Table("user_informations").Create(&tool.Setting.RootConfig)
@@ -61,9 +61,20 @@ func GetDDLTable(className string) (*gorm.DB, error) {
 }
 
 // AdminLogin 管理员登录验证函数
-func AdminLogin(username string, password string) (*models.UserInformation, error) {
+func AdminLogin(studentID string, password string) (*models.UserInformation, error) {
 	var user models.UserInformation
-	result := Database.Table("user_informations").Where("username = ? AND password = ?", username, password).First(&user)
+	result := Database.Table("user_informations").Where("student_id = ? AND password = ?", studentID, password).First(&user)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &user, nil
+}
+
+// UserLogin 用户登录函数
+func UserLogin(username string, studentID string) (*models.UserInformation, error) {
+	var user models.UserInformation
+	result := Database.Table("user_informations").Where("username = ? AND student_id = ?", username, studentID).First(&user)
 	if result.Error != nil {
 		return nil, result.Error
 	}

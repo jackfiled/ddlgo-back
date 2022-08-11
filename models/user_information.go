@@ -18,6 +18,12 @@ type UserInformation struct {
 
 // AdminLoginModel 管理员登录JSON模型
 type AdminLoginModel struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	StudentID string `json:"student_id"`
+	Password  string `json:"password"`
+}
+
+// UserLoginModel 用户登录JSON模型
+type UserLoginModel struct {
+	Username  string `json:"username"`
+	StudentID string `json:"student_id"`
 }
