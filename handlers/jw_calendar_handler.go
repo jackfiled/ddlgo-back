@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"ddlBackend/database"
 	"ddlBackend/models"
 	"ddlBackend/protos"
 	"ddlBackend/tool"
@@ -22,17 +23,53 @@ func GetSemesterCalendarHandler(context *gin.Context) {
 		return
 	}
 
-	courses, _, err := grpcGetSemester(model)
+	_, err = database.GetICSInformation(model.StudentID, model.Semester)
 	if err != nil {
-		tool.DDLLogError(err.Error())
-		// RPC中出错
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
+		// 说明没有请求过
+		courses, icsStream, err := grpcGetSemester(model)
+		if err != nil {
+			tool.DDLLogError(err.Error())
+			// RPC中出错
+			context.JSON(http.StatusInternalServerError, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		// 在数据库创建这个记录
+		newInformation := models.ICSInformation{
+			StudentID: model.StudentID,
+			Semester:  model.Semester,
+			ICSStream: icsStream,
+		}
+		database.Database.Table("user_informations").Create(&newInformation)
+
+		context.JSON(http.StatusOK, courses)
+		return
+	} else {
+		context.JSON(http.StatusBadRequest, gin.H{
+			"error": "最近才请求过，请稍后再试",
+		})
+		return
+	}
+}
+
+// GetICSFileHandler 返回ICS文件处理函数
+func GetICSFileHandler(context *gin.Context) {
+	studentID := context.Param("id")
+	semester := context.Param("semester")
+	// 去掉最后的.ics文件后缀
+	semester = semester[:len(semester)-4]
+
+	info, err := database.GetICSInformation(studentID, semester)
+	if err != nil {
+		context.JSON(http.StatusNotFound, gin.H{
+			"error": "请先获得课表再尝试下载ICS日历文件",
 		})
 		return
 	}
 
-	context.JSON(http.StatusOK, courses)
+	context.Data(http.StatusOK, "text/calendar", info.ICSStream)
 	return
 }
 

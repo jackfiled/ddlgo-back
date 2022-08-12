@@ -28,12 +28,15 @@ func main() {
 	// 登录
 	route.POST("/login", handlers.AdminLoginHandler)
 	route.POST("/auth", handlers.UserLoginHandler)
+
 	// 获取DDL事件列表
 	route.GET("/ddlNotices", handlers.ReadDDLHandler)
 	route.GET("/ddlNotices/:class", handlers.ReadClassDDLHandler)
 	route.GET("/ddlNotices/:class/:id", handlers.ReadClassIDDDLHandler)
 
+	// 获得教务课表的相关API
 	route.POST("/GetSemester", handlers.GetSemesterCalendarHandler)
+	route.GET("/Calendar/:id/:semester", handlers.GetICSFileHandler)
 
 	// 图片文件路径
 	route.Static("/picture", "./picture")
