@@ -6,10 +6,12 @@ import (
 	"ddlBackend/models"
 	"ddlBackend/protos"
 	"ddlBackend/tool"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"net/http"
+	"time"
 )
 
 func GetSemesterCalendarHandler(context *gin.Context) {
@@ -23,7 +25,7 @@ func GetSemesterCalendarHandler(context *gin.Context) {
 		return
 	}
 
-	_, err = database.GetICSInformation(model.StudentID, model.Semester)
+	info, err := database.GetICSInformation(model.StudentID, model.Semester)
 	if err != nil {
 		// 说明没有请求过
 		courses, icsStream, err := grpcGetSemester(model)
@@ -42,15 +44,36 @@ func GetSemesterCalendarHandler(context *gin.Context) {
 			Semester:  model.Semester,
 			ICSStream: icsStream,
 		}
-		database.Database.Table("user_informations").Create(&newInformation)
+		database.Database.Table("ics_informations").Create(&newInformation)
 
 		context.JSON(http.StatusOK, courses)
 		return
 	} else {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"error": "最近才请求过，请稍后再试",
-		})
-		return
+		duration := time.Now().Sub(info.UpdatedAt)
+		// 如果上次请求到现在的时间小于超时时间
+		if int64(duration) <= tool.Setting.JWGLOutTime*int64(time.Hour) {
+			targetTime := info.UpdatedAt.Add(time.Duration(tool.Setting.JWGLOutTime * int64(time.Hour)))
+			context.JSON(http.StatusBadRequest, gin.H{
+				"error": fmt.Sprintf("Too frequent requests, please try after %s", targetTime.Format("06-01-02 15:04")),
+			})
+		} else {
+			// 已经超过超时时间
+			courses, icsStream, err := grpcGetSemester(model)
+			if err != nil {
+				tool.DDLLogError(err.Error())
+				// RPC中出错
+				context.JSON(http.StatusInternalServerError, gin.H{
+					"error": err.Error(),
+				})
+				return
+			}
+
+			info.ICSStream = icsStream
+			database.Database.Table("ics_informations").Save(info)
+
+			context.JSON(http.StatusOK, courses)
+			return
+		}
 	}
 }
 

@@ -8,15 +8,17 @@ import (
 )
 
 type Config struct {
-	AppPort    string                 `json:"app_port"`
-	JWTSecret  string                 `json:"jwt_secret"`
-	RootConfig models.UserInformation `json:"root_config"`
+	AppPort     string                 `json:"app_port"`
+	JWTSecret   string                 `json:"jwt_secret"`
+	JWGLOutTime int64                  `json:"jwgl_out_time"`
+	RootConfig  models.UserInformation `json:"root_config"`
 }
 
 // DefaultSetting 默认配置文件
 var DefaultSetting = Config{
-	AppPort:   ":8080",
-	JWTSecret: "MakeBuptGreatAgain",
+	AppPort:     ":8080",
+	JWTSecret:   "MakeBuptGreatAgain",
+	JWGLOutTime: 24,
 	RootConfig: models.UserInformation{
 		Username:   "root",
 		Password:   "123456",
