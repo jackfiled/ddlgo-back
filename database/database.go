@@ -40,6 +40,14 @@ func OpenDatabase() (err error) {
 		}
 	}
 
+	// 创建记录ICS信息表
+	if !Database.Migrator().HasTable(&models.ICSInformation{}) {
+		err = Database.AutoMigrate(&models.ICSInformation{})
+		if err != nil {
+			return err
+		}
+	}
+
 	// 将配置文件中设置的根管理员存入数据库
 	_, err = AdminLogin(tool.Setting.RootConfig.StudentID, tool.Setting.RootConfig.Password)
 	if err != nil {

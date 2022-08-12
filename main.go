@@ -33,6 +33,8 @@ func main() {
 	route.GET("/ddlNotices/:class", handlers.ReadClassDDLHandler)
 	route.GET("/ddlNotices/:class/:id", handlers.ReadClassIDDDLHandler)
 
+	route.POST("/GetSemester", handlers.GetSemesterCalendarHandler)
+
 	// 图片文件路径
 	route.Static("/picture", "./picture")
 
