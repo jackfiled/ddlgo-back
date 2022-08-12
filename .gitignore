@@ -13,3 +13,6 @@ config.json
 
 # Pictures Directory
 picture/
+
+# Generated Files
+*.pb.go

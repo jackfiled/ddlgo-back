@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+option csharp_namespace = "JwglServices";
+option go_package = ".;protos";
+
+package jwgl;
+
+service Jwgler {
+	rpc GetSemester (GetSemesterRequest) returns (GetSemesterResponse);
+}
+
+// 请求学期课表的信息
+message GetSemesterRequest {
+	string studentID = 1;
+	string password = 2;
+	string semester = 3;
+}
+
+// 返回学期课表的信息
+message GetSemesterResponse {
+	repeated Course courses = 1;
+	bytes icsStream = 2;
+}
+
+// 课程信息
+message Course {
+	string name = 1;
+	string teacher = 2;
+	string place = 3;
+	repeated int32 weeks = 4;
+	string beginTimeString = 5;
+	string endTimeString =6;
+	int32 dayOfWeek = 7;
+}
+
+
