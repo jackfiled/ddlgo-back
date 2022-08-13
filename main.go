@@ -5,6 +5,8 @@ import (
 	"ddlBackend/database"
 	"ddlBackend/handlers"
 	"ddlBackend/tool"
+
+	"github.com/fvbock/endless"
 	"github.com/gin-gonic/gin"
 )
 
@@ -69,7 +71,7 @@ func main() {
 		userRoute.DELETE("/:id", handlers.DeleteUserHandler)
 	}
 
-	err = route.Run(tool.Setting.AppPort)
+	err = endless.ListenAndServe(tool.Setting.AppPort, route)
 	if err != nil {
 		tool.DDLLogError(err.Error())
 		return

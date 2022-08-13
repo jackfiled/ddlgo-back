@@ -63,28 +63,15 @@ go build
 在根目录下不存在`config.json`配置文件的时候，程序会采用下述默认配置运行
 
 ```json
-{
-    // 服务器运行时执行的端口
+{ 
     "app_port": ":8080",
-    // JWT签发密钥时使用的字符串
     "jwt_secret": "MakeBUPTGreatAgain",
-    // 请求教务系统API的超时时间 单位是小时
     "jwgl_out_time": 24,
-    // 根管理员的设置
-    // 该管理员将在程序运行时自动创建
     "root_config": {
-        // 用户名
         "username": "root",
-        // 密码
         "password": "123456",
-        // 所属的班级
         "classname": "dddd",
-        // 学号
         "student_id": "0000000000",
-        // 权限
-        // 0-User 用户 只能够查看信息而不能修改信息
-        // 1-Admin 管理员 可以修改自己所在班级的信息
-        // 2-Root 根管理员 可以修改所有的信息
         "permission": 2
     }
 }
