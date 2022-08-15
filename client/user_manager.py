@@ -1,3 +1,4 @@
+import openpyxl
 import requests
 import json
 
@@ -90,7 +91,6 @@ class Manager:
             print(response.text)
 
 
-
 class UserModel:
     id: int
     username: str
@@ -117,5 +117,29 @@ class UserModel:
         return result
     
     def toString(self):
-        return "id:{}, name:{}, permission:{}".format(self.id, self.username, self.permission)
+        return """username: {}
+student_id: {}
+classname: {}
+permission: {}""".format(self.username, self.student_id, self.class_name, self.permission)
 
+    def checkSame(self, other: "UserModel"):
+        return self.username == other.username and self.student_id == other.student_id and self.class_name == other.class_name and self.permission == other.permission
+
+
+def parse_excel(path: str)-> list:
+    work_book = openpyxl.load_workbook(path)
+    work_sheet = work_book.active
+
+    users = []
+
+    for row in work_sheet.values:
+        user = UserModel()
+        user.class_name = str(row[0] - 2021211000)
+        user.student_id = str(row[1])
+        user.username = row[2]
+        user.permission = row[3]
+        user.password = ""
+
+        users.append(user)
+        
+    return users
