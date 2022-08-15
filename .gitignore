@@ -4,6 +4,7 @@
 # Binary file
 go_build_*
 ddlBackend
+__pycache__/
 
 # Database File
 *.db
