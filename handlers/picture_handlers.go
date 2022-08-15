@@ -3,11 +3,12 @@ package handlers
 import (
 	"ddlBackend/models"
 	"ddlBackend/tool"
-	"github.com/gin-gonic/gin"
-	"github.com/satori/go.uuid"
 	"net/http"
 	"regexp"
 	"strings"
+
+	"github.com/gin-gonic/gin"
+	uuid "github.com/satori/go.uuid"
 )
 
 // UploadPictureHandler 上传文件处理函数
@@ -37,7 +38,7 @@ func UploadPictureHandler(context *gin.Context) {
 	}
 
 	// 利用正则表达式判断文件名是否符合规则
-	pattern, _ := regexp.Compile("^.*\\.((png)|(jpg))$")
+	pattern, _ := regexp.Compile(`^.*\\.((png)|(jpg))$`)
 	if !pattern.MatchString(file.Filename) {
 		context.JSON(http.StatusBadRequest, gin.H{
 			"error": "Only png and jpg picture allowed",
@@ -65,5 +66,4 @@ func UploadPictureHandler(context *gin.Context) {
 		// 第一位是. 是没有必要的
 		"address": fileName[1:],
 	})
-	return
 }

@@ -5,9 +5,10 @@ import (
 	"ddlBackend/models"
 	"ddlBackend/tool"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
 // ReadUsersHandler 读取所有用户信息的处理函数
@@ -42,7 +43,6 @@ func ReadUsersHandler(context *gin.Context) {
 	}
 
 	context.JSON(http.StatusOK, users)
-	return
 }
 
 // ReadSingleUserHandler 读取单个用户信息处理函数
@@ -86,7 +86,6 @@ func ReadSingleUserHandler(context *gin.Context) {
 	}
 
 	context.JSON(http.StatusOK, user)
-	return
 }
 
 // CreateUserHandler 创建用户处理函数
@@ -129,7 +128,6 @@ func CreateUserHandler(context *gin.Context) {
 	}
 
 	context.JSON(http.StatusCreated, user)
-	return
 }
 
 // UpdateUserHandler 更新用户信息
@@ -174,14 +172,13 @@ func UpdateUserHandler(context *gin.Context) {
 	if user.ID != uint(idNum) {
 		// 请求体和url参数不匹配
 		context.JSON(http.StatusInternalServerError, gin.H{
-			"error": fmt.Sprintf("the id %d in the url and %d in the body are not the same", user.ID, idNum),
+			"error": fmt.Sprintf("the id %d in the url and %d in the body are not the same", idNum, user.ID),
 		})
 		return
 	}
 
 	database.Database.Table("user_informations").Save(&user)
 	context.JSON(http.StatusNoContent, gin.H{})
-	return
 }
 
 // DeleteUserHandler 删除用户信息处理函数
@@ -225,7 +222,6 @@ func DeleteUserHandler(context *gin.Context) {
 
 	database.Database.Table("user_informations").Delete(&user)
 	context.JSON(http.StatusNoContent, gin.H{})
-	return
 }
 
 // AdminLoginHandler 管理员登录处理函数
@@ -261,7 +257,6 @@ func AdminLoginHandler(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{
 		"token": token,
 	})
-	return
 }
 
 // UserLoginHandler 用户登录处理函数
@@ -307,5 +302,4 @@ func UserLoginHandler(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{
 		"token": token,
 	})
-	return
 }
