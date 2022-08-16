@@ -138,7 +138,7 @@ def parse_excel(path: str)-> list:
         user.student_id = str(row[1])
         user.username = row[2]
         user.permission = row[3]
-        user.password = ""
+        user.password = "123456"
 
         users.append(user)
         

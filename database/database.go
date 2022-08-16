@@ -3,8 +3,8 @@ package database
 import (
 	"ddlBackend/models"
 	"ddlBackend/tool"
-	"errors"
 	"fmt"
+
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -65,7 +65,7 @@ func GetDDLTable(className string) (*gorm.DB, error) {
 			return Database.Table(className).Order("ddl_time DESC"), nil
 		}
 	}
-	return nil, errors.New(fmt.Sprintf("The table named %s not exists", className))
+	return nil, fmt.Errorf("the table named %s not exists", className)
 }
 
 // AdminLogin 管理员登录验证函数

@@ -304,3 +304,54 @@ func UserLoginHandler(context *gin.Context) {
 		"token": token,
 	})
 }
+
+// 管理员修改密码处理函数
+func AdminUpdatePasswordhandler(context *gin.Context) {
+	claims, err := tool.GetClaimsInContext(context)
+	if err != nil {
+		// 解析JWT令牌信息错误
+		// 返回 500 服务器错误
+		tool.DDLLogError(err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	// 修改管理员密码的请求体保持和登录一致
+	// 需要学号和新的密码
+	var loginModel models.AdminLoginModel
+	err = context.ShouldBindJSON(&loginModel)
+	if err != nil {
+		// 绑定JSON出错
+		context.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+	}
+
+	var user models.UserInformation
+	result := database.Database.Table("user_informations").Where("student_id =?", loginModel.StudentID).Find(&user)
+	if result.Error != nil {
+		// 数据库中未发现该用户
+		context.JSON(http.StatusNotFound, gin.H{
+			"error": result.Error.Error(),
+		})
+		return
+	}
+
+	// 修改密码的权限要求：
+	// 令牌持有账号和欲修改密码的账号是同一个账号
+	// 令牌的权限在管理员及以上
+	if claims.StudentID == loginModel.StudentID && claims.Permission >= models.Administrator {
+		user.Password = loginModel.Password
+		database.Database.Table("user_informations").Save(&user)
+
+		context.JSON(http.StatusOK, gin.H{})
+		return
+	} else {
+		context.JSON(http.StatusBadRequest, gin.H{
+			"error": "permission denied",
+		})
+		return
+	}
+}
