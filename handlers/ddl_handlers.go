@@ -4,10 +4,11 @@ import (
 	"ddlBackend/database"
 	"ddlBackend/models"
 	"ddlBackend/tool"
-	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"net/http"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 // CreateDDLHandler 创建DDL事件处理函数
@@ -66,7 +67,6 @@ func CreateDDLHandler(context *gin.Context) {
 	}
 
 	context.JSON(http.StatusCreated, ddlNotice)
-	return
 }
 
 // ReadDDLHandler 读取DDL事件处理函数
@@ -79,6 +79,15 @@ func ReadDDLHandler(context *gin.Context) {
 	var err error
 	var startNum, stepNum int
 	startNum, err = strconv.Atoi(start)
+	if err != nil {
+		// 请求参数转换失败
+		// 返回 400 错误请求
+		tool.DDLLogError(err.Error())
+		context.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
 	stepNum, err = strconv.Atoi(step)
 	if err != nil {
 		// 请求参数转换失败
@@ -99,5 +108,4 @@ func ReadDDLHandler(context *gin.Context) {
 	}
 
 	context.JSON(http.StatusOK, ddlNotices)
-	return
 }

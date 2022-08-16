@@ -281,10 +281,11 @@ func UserLoginHandler(context *gin.Context) {
 		return
 	}
 
-	// 如果该用户的权限大于普通用户
-	// 则不能通过学号姓名验证的方式获得令牌
 	if user.Permission > models.User {
-		context.JSON(http.StatusBadRequest, gin.H{
+		// 如果该用户的权限大于普通用户
+		// 则不能通过学号姓名验证的方式获得令牌
+		// 返回 403 Forbidden
+		context.JSON(http.StatusForbidden, gin.H{
 			"error": "该用户身份为管理员，请通过学号密码登录",
 		})
 		return

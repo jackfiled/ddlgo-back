@@ -7,11 +7,12 @@ import (
 	"ddlBackend/protos"
 	"ddlBackend/tool"
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"net/http"
-	"time"
 )
 
 func GetSemesterCalendarHandler(context *gin.Context) {
@@ -49,7 +50,7 @@ func GetSemesterCalendarHandler(context *gin.Context) {
 		context.JSON(http.StatusOK, courses)
 		return
 	} else {
-		duration := time.Now().Sub(info.UpdatedAt)
+		duration := time.Since(info.UpdatedAt)
 		// 如果上次请求到现在的时间小于超时时间
 		if int64(duration) <= tool.Setting.JWGLOutTime*int64(time.Hour) {
 			targetTime := info.UpdatedAt.Add(time.Duration(tool.Setting.JWGLOutTime * int64(time.Hour)))
@@ -93,7 +94,6 @@ func GetICSFileHandler(context *gin.Context) {
 	}
 
 	context.Data(http.StatusOK, "text/calendar", info.ICSStream)
-	return
 }
 
 // grpcGetSemester 远程过程调用获得课表的函数

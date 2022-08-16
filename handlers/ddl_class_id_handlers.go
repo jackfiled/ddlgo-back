@@ -5,10 +5,11 @@ import (
 	"ddlBackend/models"
 	"ddlBackend/tool"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"net/http"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 func ReadClassIDDDLHandler(context *gin.Context) {
@@ -49,7 +50,6 @@ func ReadClassIDDDLHandler(context *gin.Context) {
 	} else {
 		context.JSON(http.StatusOK, ddlNotice)
 	}
-	return
 }
 
 func UpdateClassIDDDLHandler(context *gin.Context) {
@@ -129,7 +129,6 @@ func UpdateClassIDDDLHandler(context *gin.Context) {
 
 	db.Save(&ddlNotice)
 	context.JSON(http.StatusNoContent, gin.H{})
-	return
 }
 
 func DeleteClassIDDDLHandler(context *gin.Context) {
@@ -189,5 +188,4 @@ func DeleteClassIDDDLHandler(context *gin.Context) {
 
 	db.Delete(&ddlNotice)
 	context.JSON(http.StatusNoContent, gin.H{})
-	return
 }

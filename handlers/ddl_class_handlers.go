@@ -4,10 +4,11 @@ import (
 	"ddlBackend/database"
 	"ddlBackend/models"
 	"ddlBackend/tool"
-	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"net/http"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 // CreateClassDDLHandler 班级url下创建DDL事件处理函数
@@ -74,7 +75,6 @@ func CreateClassDDLHandler(context *gin.Context) {
 	}
 
 	context.JSON(http.StatusCreated, ddlNotice)
-	return
 }
 
 // ReadClassDDLHandler 班级url下读取DDL事件处理函数
@@ -89,6 +89,15 @@ func ReadClassDDLHandler(context *gin.Context) {
 	var err error
 	var startNum, stepNum int
 	startNum, err = strconv.Atoi(start)
+	if err != nil {
+		// 请求参数转换失败
+		// 返回 400 错误请求
+		tool.DDLLogError(err.Error())
+		context.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
 	stepNum, err = strconv.Atoi(step)
 	if err != nil {
 		// 请求参数转换失败
@@ -115,7 +124,6 @@ func ReadClassDDLHandler(context *gin.Context) {
 
 	db.Where("notice_type = ?", noticeType).Offset(startNum).Limit(stepNum).Find(&ddlNotices)
 	context.JSON(http.StatusOK, ddlNotices)
-	return
 }
 
 // checkClassAdminPermission 检查当前请求令牌的持有者是否有权限修改当前班级的内容
