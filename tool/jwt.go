@@ -3,9 +3,10 @@ package tool
 import (
 	"ddlBackend/models"
 	"errors"
+	"time"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"time"
 )
 
 // GenerateJWTToken 生成JWT令牌
@@ -15,7 +16,7 @@ func GenerateJWTToken(info models.UserInformation) (string, error) {
 
 	// 设置token中的信息
 	claims := models.JWTClaims{
-		Username:   info.Username,
+		StudentID:  info.StudentID,
 		Classname:  info.Classname,
 		Permission: info.Permission,
 		StandardClaims: jwt.StandardClaims{
