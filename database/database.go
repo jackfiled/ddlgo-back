@@ -95,7 +95,7 @@ func UserLogin(username string, studentID string) (*models.UserInformation, erro
 // GetICSInformation 获得ICSInformation
 func GetICSInformation(studentID string, semester string) (*models.ICSInformation, error) {
 	var info models.ICSInformation
-	result := Database.Table("ics_informations").Where("student_id = ? AND semester = ?", studentID, semester).Find(&info)
+	result := Database.Table("ics_informations").Where("student_id = ? AND semester = ?", studentID, semester).First(&info)
 
 	if result.Error != nil {
 		return nil, result.Error

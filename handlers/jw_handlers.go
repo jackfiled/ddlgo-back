@@ -98,7 +98,7 @@ func GetICSFileHandler(context *gin.Context) {
 
 // grpcGetSemester 远程过程调用获得课表的函数
 func grpcGetSemester(model models.GetSemesterCalendarModel) ([]*protos.Course, []byte, error) {
-	connection, err := grpc.Dial("localhost:7000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	connection, err := grpc.Dial(tool.Setting.JWGrpcAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, nil, err
 	}
