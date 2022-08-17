@@ -118,6 +118,9 @@ func CreateUserHandler(context *gin.Context) {
 		return
 	}
 
+	// 将密码加盐哈希之后储存在数据库中
+	user.Password = tool.Sha256PasswordWithSalt(user.Password)
+
 	result := database.Database.Table("user_informations").Create(&user)
 	if result.Error != nil {
 		tool.DDLLogError(result.Error.Error())
@@ -176,6 +179,9 @@ func UpdateUserHandler(context *gin.Context) {
 		})
 		return
 	}
+
+	// 密码加盐哈希之后再存入数据库
+	user.Password = tool.Sha256PasswordWithSalt(user.Password)
 
 	database.Database.Table("user_informations").Save(&user)
 	context.JSON(http.StatusNoContent, gin.H{})

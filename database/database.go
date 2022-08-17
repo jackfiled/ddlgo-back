@@ -70,6 +70,8 @@ func GetDDLTable(className string) (*gorm.DB, error) {
 
 // AdminLogin 管理员登录验证函数
 func AdminLogin(studentID string, password string) (*models.UserInformation, error) {
+	password = tool.Sha256PasswordWithSalt(password)
+
 	var user models.UserInformation
 	result := Database.Table("user_informations").Where("student_id = ? AND password = ?", studentID, password).First(&user)
 	if result.Error != nil {
