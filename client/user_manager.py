@@ -24,6 +24,7 @@ class Manager:
             self.header = {
                 "Authorization": "Bearer " + jsonMap["token"]
             }
+            print(jsonMap["token"])
             return True
         else:
             print(response.text)

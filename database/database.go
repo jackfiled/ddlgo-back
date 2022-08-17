@@ -51,8 +51,11 @@ func OpenDatabase() (err error) {
 	// 将配置文件中设置的根管理员存入数据库
 	_, err = AdminLogin(tool.Setting.RootConfig.StudentID, tool.Setting.RootConfig.Password)
 	if err != nil {
-		// 引发没有找到的错误
-		Database.Table("user_informations").Create(&tool.Setting.RootConfig)
+		// 遇到没有找到的错误
+		// 在数据库中创建该用户
+		info := tool.Setting.RootConfig
+		info.Password = tool.Sha256PasswordWithSalt(info.Password)
+		Database.Table("user_informations").Create(&info)
 	}
 
 	return nil

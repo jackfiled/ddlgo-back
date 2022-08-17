@@ -3,7 +3,7 @@ import user_manager
 manager = user_manager.Manager()
 
 manager.header = {
-    "Authorization": "Bearer " + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJvb3QiLCJjbGFzc25hbWUiOiJkZGRkIiwicGVybWlzc2lvbiI6MiwiZXhwIjoxNjYwNjM2NzM1LCJpc3MiOiJTcXVpZFdhcmQifQ.irxMPA7eVP8hm_1DReQyXAxfvt8gebxXwxYouSFDD0Y"
+    "Authorization": "Bearer " + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdHVkZW50X2lkIjoiMDAwMDAwMDAwMCIsImNsYXNzbmFtZSI6ImRkZGQiLCJwZXJtaXNzaW9uIjoyLCJleHAiOjE2NjA4MTgxMzIsImlzcyI6IlNxdWlkV2FyZCJ9.dQ81IOrD-nmnNNQB6ZsAjLQAaWzou1hYoUjH3oHRbhE"
 }
 
 def upload_excel():
