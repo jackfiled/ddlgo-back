@@ -43,6 +43,15 @@ func CreateDDLHandler(context *gin.Context) {
 		return
 	}
 
+	if ddlNotice.NoticeType == models.ALL {
+		// 类别设置为 1 全部
+		// 不允许创建
+		context.JSON(http.StatusBadRequest, gin.H{
+			"error": "all notice type of ddl is prohibited",
+		})
+		return
+	}
+
 	var db *gorm.DB
 	db, err = database.GetDDLTable(ddlNotice.ClassName)
 	if err != nil {
@@ -115,10 +124,10 @@ func ReadDDLHandler(context *gin.Context) {
 		var list []models.DDLNotice
 		if noticeTypeNum == models.ALL {
 			// 筛选所有的活动事件
-			db.Where("noticeType != ?", models.DDL).Offset(startNum).Limit(stepNum).Find(&list)
+			db.Where("notice_type != ?", models.DDL).Offset(startNum).Limit(stepNum).Find(&list)
 		} else {
 			// 筛选指定类型的事件
-			db.Where("noticeType = ?", noticeTypeNum).Offset(startNum).Limit(stepNum).Find(&list)
+			db.Where("notice_type = ?", noticeTypeNum).Offset(startNum).Limit(stepNum).Find(&list)
 		}
 		ddlNotices = append(ddlNotices, list...)
 	}

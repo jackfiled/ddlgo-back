@@ -42,6 +42,15 @@ func CreateClassDDLHandler(context *gin.Context) {
 		return
 	}
 
+	if ddlNotice.NoticeType == models.ALL {
+		// 类别设置为 1 全部
+		// 不允许创建
+		context.JSON(http.StatusBadRequest, gin.H{
+			"error": "all notice type of ddl is prohibited",
+		})
+		return
+	}
+
 	if className != ddlNotice.ClassName {
 		// 请求url和请求体中班级不符
 		// 返回 400 错误请求
@@ -133,9 +142,9 @@ func ReadClassDDLHandler(context *gin.Context) {
 	}
 
 	if noticeTypeNum == models.ALL {
-		db.Where("noticeType != ?", models.ALL).Offset(startNum).Limit(stepNum).Find(&ddlNotices)
+		db.Where("notice_type != ?", models.ALL).Offset(startNum).Limit(stepNum).Find(&ddlNotices)
 	} else {
-		db.Where("noticeType = ?", noticeTypeNum).Offset(startNum).Limit(stepNum).Find(&ddlNotices)
+		db.Where("notice_type = ?", noticeTypeNum).Offset(startNum).Limit(stepNum).Find(&ddlNotices)
 	}
 	context.JSON(http.StatusOK, ddlNotices)
 }
@@ -148,7 +157,10 @@ func checkClassAdminPermission(context *gin.Context, classname string) (bool, er
 		return false, err
 	}
 
-	if claims.Classname == classname && claims.Permission >= models.Administrator {
+	// 权限为根管理员
+	// 或者为本班的管理员
+	// 即可修改该班的内容
+	if claims.Permission > models.Administrator && (claims.Classname == classname || claims.Permission > models.User) {
 		return true, nil
 	} else {
 		return false, nil
