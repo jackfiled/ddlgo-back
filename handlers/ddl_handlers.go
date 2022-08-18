@@ -77,7 +77,7 @@ func ReadDDLHandler(context *gin.Context) {
 
 	// 将过滤器参数从字符串转换为数字
 	var err error
-	var startNum, stepNum int
+	var startNum, stepNum, noticeTypeNum int
 	startNum, err = strconv.Atoi(start)
 	if err != nil {
 		// 请求参数转换失败
@@ -98,12 +98,28 @@ func ReadDDLHandler(context *gin.Context) {
 		})
 		return
 	}
+	noticeTypeNum, err = strconv.Atoi(noticeType)
+	if err != nil {
+		// 请求参数转换失败
+		// 返回 400 错误请求
+		tool.DDLLogError(err.Error())
+		context.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
 
 	var ddlNotices []models.DDLNotice
 	for _, value := range database.DDLTables {
 		db, _ := database.GetDDLTable(value)
 		var list []models.DDLNotice
-		db.Where("notice_type = ?", noticeType).Offset(startNum).Limit(stepNum).Find(&list)
+		if noticeTypeNum == models.ALL {
+			// 筛选所有的活动事件
+			db.Where("noticeType != ?", models.DDL).Offset(startNum).Limit(stepNum).Find(&list)
+		} else {
+			// 筛选指定类型的事件
+			db.Where("noticeType = ?", noticeTypeNum).Offset(startNum).Limit(stepNum).Find(&list)
+		}
 		ddlNotices = append(ddlNotices, list...)
 	}
 

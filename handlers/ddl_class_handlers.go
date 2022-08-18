@@ -87,7 +87,7 @@ func ReadClassDDLHandler(context *gin.Context) {
 
 	// 将过滤器参数从字符串转换为数字
 	var err error
-	var startNum, stepNum int
+	var startNum, stepNum, noticeTypeNum int
 	startNum, err = strconv.Atoi(start)
 	if err != nil {
 		// 请求参数转换失败
@@ -99,6 +99,16 @@ func ReadClassDDLHandler(context *gin.Context) {
 		return
 	}
 	stepNum, err = strconv.Atoi(step)
+	if err != nil {
+		// 请求参数转换失败
+		// 返回 400 错误请求
+		tool.DDLLogError(err.Error())
+		context.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	noticeTypeNum, err = strconv.Atoi(noticeType)
 	if err != nil {
 		// 请求参数转换失败
 		// 返回 400 错误请求
@@ -122,7 +132,11 @@ func ReadClassDDLHandler(context *gin.Context) {
 		return
 	}
 
-	db.Where("notice_type = ?", noticeType).Offset(startNum).Limit(stepNum).Find(&ddlNotices)
+	if noticeTypeNum == models.ALL {
+		db.Where("noticeType != ?", models.ALL).Offset(startNum).Limit(stepNum).Find(&ddlNotices)
+	} else {
+		db.Where("noticeType = ?", noticeTypeNum).Offset(startNum).Limit(stepNum).Find(&ddlNotices)
+	}
 	context.JSON(http.StatusOK, ddlNotices)
 }
 

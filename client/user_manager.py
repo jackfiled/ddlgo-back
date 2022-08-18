@@ -135,7 +135,7 @@ def parse_excel(path: str)-> list:
 
     for row in work_sheet.values:
         user = UserModel()
-        user.class_name = str(row[0] - 2021211000)
+        user.class_name = str(row[0])
         user.student_id = str(row[1])
         user.username = row[2]
         user.permission = row[3]

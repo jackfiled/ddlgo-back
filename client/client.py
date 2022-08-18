@@ -17,3 +17,6 @@ def get_users():
 
     for user in users:
         print(user.toString())
+
+upload_excel()
+get_users()

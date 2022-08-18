@@ -66,7 +66,7 @@ func main() {
 	{
 		userRoute.GET("/", handlers.ReadUsersHandler)
 		userRoute.POST("/", handlers.CreateUserHandler)
-		userRoute.POST("/password", handlers.AdminUpdatePasswordhandler)
+		userRoute.POST("/password", handlers.AdminUpdatePasswordHandler)
 		userRoute.GET("/:id", handlers.ReadSingleUserHandler)
 		userRoute.PUT("/:id", handlers.UpdateUserHandler)
 		userRoute.DELETE("/:id", handlers.DeleteUserHandler)

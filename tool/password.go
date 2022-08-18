@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 )
 
-// 密码加盐hash10000次函数
+// Sha256PasswordWithSalt 密码加盐hash10000次函数
 func Sha256PasswordWithSalt(password string) string {
 	salt := []byte(Setting.PasswordSalt)
 	result := sha256.Sum256(append([]byte(password), salt...))

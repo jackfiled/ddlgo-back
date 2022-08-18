@@ -311,8 +311,8 @@ func UserLoginHandler(context *gin.Context) {
 	})
 }
 
-// 管理员修改密码处理函数
-func AdminUpdatePasswordhandler(context *gin.Context) {
+// AdminUpdatePasswordHandler 管理员修改密码处理函数
+func AdminUpdatePasswordHandler(context *gin.Context) {
 	claims, err := tool.GetClaimsInContext(context)
 	if err != nil {
 		// 解析JWT令牌信息错误
