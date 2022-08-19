@@ -17,7 +17,7 @@ func GenerateJWTToken(info models.UserInformation) (string, error) {
 	// 设置token中的信息
 	claims := models.JWTClaims{
 		StudentID:  info.StudentID,
-		Classname:  info.Classname,
+		ClassName:  info.ClassName,
 		Permission: info.Permission,
 		StandardClaims: jwt.StandardClaims{
 			// token失效时间

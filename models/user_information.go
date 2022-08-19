@@ -8,8 +8,8 @@ type UserInformation struct {
 	Username string `json:"username"`
 	// Password 用户密码
 	Password string `json:"password"`
-	// Classname 所在班级
-	Classname string `json:"classname"`
+	// ClassName 所在班级
+	ClassName string `json:"class_name"`
 	// StudentID 学号
 	StudentID string `json:"student_id"`
 	// Permission 权限

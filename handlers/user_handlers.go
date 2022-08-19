@@ -261,7 +261,10 @@ func AdminLoginHandler(context *gin.Context) {
 	}
 
 	context.JSON(http.StatusOK, gin.H{
-		"token": token,
+		"token":      token,
+		"username":   user.Username,
+		"class_name": user.ClassName,
+		"student_id": user.StudentID,
 	})
 }
 
@@ -307,7 +310,10 @@ func UserLoginHandler(context *gin.Context) {
 	}
 
 	context.JSON(http.StatusOK, gin.H{
-		"token": token,
+		"token":      token,
+		"username":   user.Username,
+		"class_name": user.ClassName,
+		"student_id": user.StudentID,
 	})
 }
 

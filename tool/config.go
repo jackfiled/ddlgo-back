@@ -26,7 +26,7 @@ var DefaultSetting = Config{
 	RootConfig: models.UserInformation{
 		Username:   "root",
 		Password:   "123456",
-		Classname:  "dddd",
+		ClassName:  "dddd",
 		StudentID:  "0000000000",
 		Permission: models.Root,
 	},

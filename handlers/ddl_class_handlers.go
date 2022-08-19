@@ -160,7 +160,7 @@ func checkClassAdminPermission(context *gin.Context, classname string) (bool, er
 	// 权限为根管理员
 	// 或者为本班的管理员
 	// 即可修改该班的内容
-	if claims.Permission > models.Administrator && (claims.Classname == classname || claims.Permission > models.User) {
+	if claims.Permission > models.Administrator && (claims.ClassName == classname || claims.Permission > models.User) {
 		return true, nil
 	} else {
 		return false, nil
