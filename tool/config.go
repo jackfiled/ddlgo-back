@@ -2,6 +2,7 @@ package tool
 
 import (
 	"bufio"
+	"ddlBackend/database"
 	"ddlBackend/models"
 	"encoding/json"
 	"os"
@@ -14,6 +15,8 @@ type Config struct {
 	JWGLOutTime   int64                  `json:"jwgl_out_time"`
 	JWGrpcAddress string                 `json:"jw_grpc_address"`
 	RootConfig    models.UserInformation `json:"root_config"`
+	UseMysql      bool                   `json:"use_mysql"`
+	MysqlConfig   database.MysqlModel    `json:"mysql_config"`
 }
 
 // DefaultSetting 默认配置文件
@@ -22,7 +25,7 @@ var DefaultSetting = Config{
 	JWTSecret:     "MakeBuptGreatAgain",
 	JWGLOutTime:   24,
 	PasswordSalt:  "MakeBuptGreatAgain",
-	JWGrpcAddress: "http://rrricardo.top:7000",
+	JWGrpcAddress: "rrricardo.top:7000",
 	RootConfig: models.UserInformation{
 		Username:   "root",
 		Password:   "123456",
@@ -30,6 +33,7 @@ var DefaultSetting = Config{
 		StudentID:  "0000000000",
 		Permission: models.Root,
 	},
+	UseMysql: false,
 }
 
 // Setting 配置文件对象

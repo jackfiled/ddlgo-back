@@ -5,6 +5,7 @@ import (
 	"ddlBackend/tool"
 	"fmt"
 
+	"gorm.io/driver/mysql"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -17,7 +18,11 @@ var Database *gorm.DB
 
 // OpenDatabase 打开数据库函数
 func OpenDatabase() (err error) {
-	Database, err = gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
+	if tool.Setting.UseMysql {
+		Database, err = gorm.Open(mysql.Open(tool.Setting.MysqlConfig.GenerateConnectionString()), &gorm.Config{})
+	} else {
+		Database, err = gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
+	}
 	if err != nil {
 		return err
 	}

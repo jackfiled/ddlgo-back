@@ -265,6 +265,7 @@ func AdminLoginHandler(context *gin.Context) {
 		"username":   user.Username,
 		"class_name": user.ClassName,
 		"student_id": user.StudentID,
+		"permission": user.Permission,
 	})
 }
 
@@ -314,6 +315,7 @@ func UserLoginHandler(context *gin.Context) {
 		"username":   user.Username,
 		"class_name": user.ClassName,
 		"student_id": user.StudentID,
+		"permission": user.Permission,
 	})
 }
 
