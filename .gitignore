@@ -1,3 +1,16 @@
-config/config-t.go
-ddl
-权限表.xls
+# Goland Setting
+.idea/
+
+# Binary file
+go_build_*
+ddlBackend
+__pycache__/
+
+# Database File
+*.db
+
+# Setting File
+config.json
+
+# Pictures Directory
+picture/

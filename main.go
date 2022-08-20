@@ -1,83 +1,80 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
-	"os"
-	"strconv"
+	"ddlBackend/Middleware"
+	"ddlBackend/database"
+	"ddlBackend/handlers"
+	"ddlBackend/tool"
 
-	"ddl/admin"
-	"ddl/auth"
-	"ddl/common"
-	"ddl/config"
-	"ddl/database"
-	"ddl/query"
-
+	"github.com/fvbock/endless"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	err := database.Open()
+	// 读取配置文件
+	err := tool.ReadConfig()
 	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
+		tool.DDLLogError(err.Error())
+		tool.DDLLogError("Read config file failed, using default setting")
 	}
 
-	router := gin.Default()
-
-	router.Use(common.Cors())
-
-	router.GET("/", indexHandler)
-
-	//测试用
-	router.StaticFile("/login.html", "./static/login.html")
-
-	router.GET("/api/wechatlogin", auth.WechatLoginHandler)
-	router.POST("/api/login", auth.LoginHandler)
-	router.GET("/api/logout", auth.LogoutHandler)
-
-	router.GET("/api/qrcode_login", auth.QRCodeLoginHandler)
-	router.GET("/api/qrcode_wechat_login", auth.QRCodeWechatLoginHandler)
-	router.Any("/api/qrcodews", auth.QRCodeWSHandler)
-
-	router.GET("/WW_verify_udfdZsIBL9yNi4SN.txt", WWVerify)
-
-	router.GET("/api/check_auth", auth.CheckAuthHandler)
-	router.GET("/api/auth_demo", auth.AuthDemoHandler)
-	router.GET("/api/set_permission_demo", setPermission)
-
-	router.GET("/api/get_list", query.GetListHandler)
-	router.GET("/api/query_single", query.QuerySingleHandler)
-
-	router.POST("/api/save", admin.SaveHandler)
-	router.DELETE("/api/delete", admin.DeleteHandler)
-	router.POST("/api/upload_img", admin.UploadFileHandler)
-
-	go auth.QRCodeWSHeatBeat()
-
-	if os.Getenv("DEBUG") != "" {
-		router.Run(":3004")
-	} else {
-		router.Run(config.WEB_ADDR)
-	}
-}
-
-func indexHandler(c *gin.Context) {
-	c.String(200, "DDL系统API")
-}
-
-//微信扫码授权验证
-func WWVerify(c *gin.Context) {
-	c.String(200, "udfdZsIBL9yNi4SN")
-}
-
-func setPermission(c *gin.Context) {
-	if c.Request.FormValue("studentID") == "" {
-		c.String(http.StatusBadRequest, "参数错误")
+	// 打开数据库
+	err = database.OpenDatabase()
+	if err != nil {
+		tool.DDLLogError(err.Error())
 		return
 	}
-	studentID, _ := strconv.ParseInt(c.Request.FormValue("studentID"), 10, 32)
-	permission, _ := strconv.ParseInt(c.Request.FormValue("permission"), 10, 64)
-	userInfo := auth.SetUserPermission(int32(studentID), permission)
-	c.String(200, strconv.Itoa(int(userInfo.StudentID))+"权限修改为"+strconv.Itoa(int(userInfo.Permission)))
+
+	route := gin.Default()
+
+	// 登录
+	route.POST("/login", handlers.AdminLoginHandler)
+	route.POST("/auth", handlers.UserLoginHandler)
+
+	// 获取DDL事件列表
+	route.GET("/ddlNotices", handlers.ReadDDLHandler)
+	route.GET("/ddlNotices/:class", handlers.ReadClassDDLHandler)
+	route.GET("/ddlNotices/:class/:id", handlers.ReadClassIDDDLHandler)
+
+	// 获得教务课表的相关API
+	route.POST("/GetSemester", handlers.GetSemesterCalendarHandler)
+	route.GET("/Calendar/:id/:semester", handlers.GetICSFileHandler)
+
+	// 图片文件路径
+	route.Static("/picture", "./picture")
+
+	// 修改DDL事件列表需要身份验证
+	ddlNoticesRoute := route.Group("")
+	ddlNoticesRoute.Use(Middleware.JWTAuthMiddleware())
+	{
+		ddlNoticesRoute.POST("/ddlNotices", handlers.CreateDDLHandler)
+		ddlNoticesRoute.POST("/ddlNotices/:class", handlers.CreateClassDDLHandler)
+		ddlNoticesRoute.PUT("/ddlNotices/:class/:id", handlers.UpdateClassIDDDLHandler)
+		ddlNoticesRoute.DELETE("/ddlNotices/:class/:id", handlers.DeleteClassIDDDLHandler)
+	}
+
+	// 其他需要身份验证的API
+	adminRoute := route.Group("")
+	adminRoute.Use(Middleware.JWTAuthMiddleware())
+	{
+		adminRoute.POST("/upload", handlers.UploadPictureHandler)
+	}
+
+	// 用户管理相关API需要验证
+	userRoute := route.Group("/users")
+	userRoute.Use(Middleware.JWTAuthMiddleware())
+	{
+		userRoute.GET("/", handlers.ReadUsersHandler)
+		userRoute.POST("/", handlers.CreateUserHandler)
+		userRoute.POST("/password", handlers.AdminUpdatePasswordHandler)
+		userRoute.GET("/:id", handlers.ReadSingleUserHandler)
+		userRoute.PUT("/:id", handlers.UpdateUserHandler)
+		userRoute.DELETE("/:id", handlers.DeleteUserHandler)
+	}
+
+	err = endless.ListenAndServe(tool.Setting.AppPort, route)
+	if err != nil {
+		tool.DDLLogError(err.Error())
+		return
+	}
 }
