@@ -32,54 +32,86 @@ go build
 ### 配置文件
 
 程序采用`config.json`文件作为配置文件，该文件的模板如下
+
 ```json
 {
-    // 服务器运行时执行的端口
-    "app_port": ":4000",
-    // JWT签发密钥时使用的字符串
-    "jwt_secret": "MakeBUPTGreatAgain",
-    // 请求教务系统API的超时时间
-    "jwgl_out_time": 0,
-    // 根管理员的设置
-    // 该管理员将在程序运行时自动创建
-    "root_config": {
-        // 用户名
-        "username": "root",
-        // 密码
-        "password": "123456",
-        // 所属的班级
-        "classname": "dddd",
-        // 学号
-        "student_id": "0000000000",
-        // 权限
-        // 0-User 用户 只能够查看信息而不能修改信息
-        // 1-Admin 管理员 可以修改自己所在班级的信息
-        // 2-Root 根管理员 可以修改所有的信息
-        "permission": 2
-    }
+  "app_port": ":4000",
+  "jwt_secret": "MakeBUPTGreatAgain",
+  "jwgl_out_time": 0,
+  "root_config": {
+    "username": "root",
+    "password": "123456",
+    "class_name": "dddd",
+    "student_id": "0000000000",
+    "permission": 2
+  },
+  "use_mysql": false,
+  "mysql_config": {
+    "username": "admin",
+    "password": "123456",
+    "address": "localhost:3306",
+    "database_name": "name"
+  }
 }
 ```
+
+配置文件中各个字段的意义如下：
+
+- `app_port` 服务器运行的端口号
+- `jwt_secret` 签发JWT令牌时采用的密钥
+- `jwgl_out_time` 请求教务系统时，为避免过于频繁的请求而设置的超时时间
+- `root_config` 为方便管理 在程序开始运行时会自动在数据库中创建的管理用户账号
+- `use_mysql` 程序是否使用`mysql`作为数据库
+
+`root_config`下述字段的意义如下：
+
+- `username`: 用户名/姓名
+- `password`: 密码
+- `class_name`: 所属班级
+- `student_id`: 学号
+- `permission`: 权限
+
+`mysql_config`下述字段的意义如下：
+
+- `username`: 数据库用户名
+- `password`: 对应用户的密码
+- `address`: 数据库所在的地址
+- `database_name`: 数据库名称
+
+> 在程序中，班级可被设置为"dddd"以表示大班或者"304"~"309"以表示各小班
+> 
+> 在程序中，人员的权限可被设置为如下三个层级：
+> 
+> - 0 普通用户 只能查看而无法修改任何内容
+> - 1 班级管理员 可以修改本班的内容
+> - 2 根管理员 可以修改所有的内容
+> 
+> 在`use_mysql`字段被设置为`false`的状态下，`mysql_config`字段可以不填写
 
 在根目录下不存在`config.json`配置文件的时候，程序会采用下述默认配置运行
 
 ```json
-{ 
-    "app_port": ":8080",
-    "jwt_secret": "MakeBUPTGreatAgain",
-    "jwgl_out_time": 24,
-    "root_config": {
-        "username": "root",
-        "password": "123456",
-        "classname": "dddd",
-        "student_id": "0000000000",
-        "permission": 2
-    }
+{
+  "app_port": ":8080",
+  "jwt_secret": "MakeBUPTGreatAgain",
+  "jwgl_out_time": 24,
+  "root_config": {
+    "username": "root",
+    "password": "123456",
+    "classname": "dddd",
+    "student_id": "0000000000",
+    "permission": 2
+  },
+  "use_mysql": false
 }
 ```
 
+程序会在当前文件夹中自动创建一个`test.db`的数据库文件，采用`sqlite`作为默认的数据库。
+
 ## API文档
 
-使用[Apifox](https://www.apifox.cn/)产生的文档[链接](https://www.apifox.cn/apidoc/shared-5d0ad1be-c569-466d-9c59-3e4686b7e482/api-33104131)
+使用[Apifox](https://www.apifox.cn/)
+产生的文档[链接](https://www.apifox.cn/apidoc/shared-5d0ad1be-c569-466d-9c59-3e4686b7e482/api-33104131)
 
 
 
