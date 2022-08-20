@@ -2,7 +2,6 @@ package tool
 
 import (
 	"bufio"
-	"ddlBackend/database"
 	"ddlBackend/models"
 	"encoding/json"
 	"os"
@@ -16,7 +15,7 @@ type Config struct {
 	JWGrpcAddress string                 `json:"jw_grpc_address"`
 	RootConfig    models.UserInformation `json:"root_config"`
 	UseMysql      bool                   `json:"use_mysql"`
-	MysqlConfig   database.MysqlModel    `json:"mysql_config"`
+	MysqlConfig   models.MysqlModel      `json:"mysql_config"`
 }
 
 // DefaultSetting 默认配置文件
