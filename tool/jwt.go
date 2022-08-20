@@ -5,8 +5,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 // GenerateJWTToken 生成JWT令牌
@@ -19,9 +19,9 @@ func GenerateJWTToken(info models.UserInformation) (string, error) {
 		StudentID:  info.StudentID,
 		ClassName:  info.ClassName,
 		Permission: info.Permission,
-		StandardClaims: jwt.StandardClaims{
+		RegisteredClaims: jwt.RegisteredClaims{
 			// token失效时间
-			ExpiresAt: expireTime.Unix(),
+			ExpiresAt: jwt.NewNumericDate(expireTime),
 			// token签发人
 			Issuer: "SquidWard",
 		},

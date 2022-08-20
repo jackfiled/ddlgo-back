@@ -33,7 +33,7 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 				"error": err.Error(),
 			})
 			context.Abort()
-		} else if time.Now().Unix() > claims.ExpiresAt {
+		} else if time.Now().Unix() > claims.ExpiresAt.Unix() {
 			// 令牌过期
 			context.JSON(http.StatusUnauthorized, gin.H{
 				"error": "The token has been expired",
