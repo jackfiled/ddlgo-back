@@ -1,4 +1,7 @@
-# DDLBackend
+# ddlgo-back
+
+暑假闲得没事为[Squidward](http://squidward.top/)写的后端。 仓库fork自[上游](https://gitee.com/zoctopus/ddlgo-back), ~~虽然最后没有被合并进入主线就是啦。~~
+
 
 ## 特点
 
@@ -13,7 +16,7 @@
 将仓库克隆到本地
 
 ```bash
-git clone https://github.com/jackfiled/DDLBackend.git
+git clone https://github.com/jackfiled/ddlgo-back.git
 ```
 
 切换进入软件目录，使用`go build`编译可执行程序，运行程序。
